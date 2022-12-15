@@ -1,0 +1,287 @@
+#########################################################
+# Define the main deployment of the app                 #
+#########################################################
+
+# Image and any required credentials to download it for the default deployment
+image:
+  image: "redis"
+  pullPolicy: Always
+  credentials:
+    create: false
+    username: ""
+    password: ""
+    secretRef: ""
+
+# Default security contetx
+securityContext: 
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 999 # redis image creates this user
+  runAsGroup: 999 # redis image creates this user
+
+# Enable deployment - by default we enable a simple deployment
+deployment: 
+  enabled: true
+  command: "sh"
+  args: ["-c", "sleep 1000"]
+
+# Configure the number of pods for this service.  If autoscale is enabled, replica count is not used.
+replicaCount: 2
+autoscale:
+  enabled: false
+  minPods: 2
+  maxPods: 4
+  cpuAverageUtilizationThreshold: 70
+
+podDisruptionBudget: 
+  enabled: true
+
+# Enable and configure a service with a reasonable default port
+service:
+  type: ClusterIP
+  port: 80
+
+# Configure resources it will be given with reasonable defaults
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+# pod liveness and readiness probes to check the applications health
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+# livenessProbe: 
+#   httpGet:
+#     path: /health
+#     port: 8080
+#     httpHeaders:
+#     - name: Custom-Header
+#       value: Awesome
+#   initialDelaySeconds: 3
+#   periodSeconds: 3
+
+# readinessProbe: 
+#   httpGet:
+#     path: /health
+#     port: 8080
+#     httpHeaders:
+#     - name: Custom-Header
+#       value: Awesome
+#   initialDelaySeconds: 3
+#   periodSeconds: 3
+
+# List key/value pairs to be included in this service's ConfigMap
+configData: 
+  K8EZ: 'YES'
+
+# Set secret data key-value pairs that will be loaded into env variables
+# this expects values are already base64 encoded
+secretData: 
+  SECRET: 'dmFsdWU='
+
+# See https://kubernetes.io/docs/concepts/storage/volumes/
+volumes: 
+  - name: mydir
+    hostPath:
+      # Ensure the file directory is created.
+      path: /var/local/aaa
+      type: DirectoryOrCreate
+
+volumeMounts: 
+  - name: mydir
+    mountPath: /mount
+
+# See https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+persistentVolumeClaims: []
+# - name: myvolumeclaim
+#   accessMode: ReadWriteMany
+#   storageClassName: default
+#   resources:
+#     requests:
+#       storage: 1Gi
+
+# Possibly select a certain type of node
+nodeSelector: {}
+
+# Set tolerations
+tolerations: []
+
+# Set pod affinity
+affinity: {}
+
+###########
+# Ingress #
+###########
+
+# Kubernetes native ingress and Istio are supported, only enable one or neither of them.
+# If you enable neither you will need to port-forward to dash
+ingress:
+  hosts: 
+    # Add lists of hosts
+    - example.local
+  path: /
+
+  # Deploys a Kubernetes Ingress resource
+  k8sIngress:
+    enabled: true
+    annotations:
+      # kubernetes.io/ingress.class: gce
+      kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      # kubernetes.io/ingress.allow-http: false
+      # kubernetes.io/tls-acme: true
+    tls: []
+      # Secrets must be manually created in the namespace.
+      # - secretName: dash-certificate
+      #   hosts:
+      #     - example.local
+  # Deploys an Istio VirtualService, DestinationRule, Gateway (optional), PeerAuthentication (optional)
+  istio:
+    enabled: false
+    loadBalancerType: ROUND_ROBIN
+    mtlsMode: "PERMISSIVE"
+
+ingressgateway:
+  enabled: false
+  gateways: []
+  hosts: []
+  paths:
+    - /
+  loadBalancerType: ROUND_ROBIN
+
+#########################################################
+# Stateful Sets                                         #
+#########################################################
+
+statefulSets:
+  enabled: true
+  statefulsets: 
+    - name: abcd
+      image: redis
+      port: 4000
+      serviceType: "ClusterIP"
+      replicaCount: 1
+      command: "sh"
+      args: ["-c", "sleep 1000"]
+      volumes: 
+        - name: mydir
+          hostPath:
+            # Ensure the file directory is created.
+            path: /var/local/aaa
+            type: DirectoryOrCreate
+      volumeMounts: 
+        - name: mydir
+          mountPath: /mount
+      env: 
+        ENVVAR: 'value'
+
+#############################################################
+# Additional Deployments                                    #
+#############################################################
+
+extraDeployment:
+  enabled: true
+  hpaExtra: # autoscaling
+    enabled: false
+  deployments: 
+    - name: abcde
+      image: redis
+      port: 4000
+      serviceType: "ClusterIP"
+      replicaCount: 1
+      command: "sh"
+      args: ["-c", "sleep 1000"]
+      volumes: 
+        - name: mydir
+          hostPath:
+            # Ensure the file directory is created.
+            path: /var/local/aaa
+            type: DirectoryOrCreate
+      volumeMounts: 
+        - name: mydir
+          mountPath: /mount
+      env: 
+        ENVVAR: 'value'
+      
+      minPods: 2
+      maxPods: 4
+      cpuAverageUtilizationThreshold: 70
+
+      securityContext: 
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+    - name: abcdf
+      image: redis
+      port: 4000
+      serviceType: "ClusterIP"
+      replicaCount: 1
+      command: "sh"
+      args: ["-c", "sleep 1000"]
+      volumes: 
+        - name: mydir
+          hostPath:
+            # Ensure the file directory is created.
+            path: /var/local/aaa
+            type: DirectoryOrCreate
+      volumeMounts: 
+        - name: mydir
+          mountPath: /mount
+      env: 
+        ENVVAR: 'value'
+      
+      minPods: 2
+      maxPods: 4
+      cpuAverageUtilizationThreshold: 70
+
+
+############
+# CronJobs #
+############
+
+cronJobs:
+  enabled: true
+  scheduled: 
+    - name: abc
+      image: redis
+      schedule: "30 * * * *" # every 30 min
+      command: "sh"
+      args: ["-c", "sleep 1000"]
+      volumes: 
+        - name: mydir
+          hostPath:
+            # Ensure the file directory is created.
+            path: /var/local/aaa
+            type: DirectoryOrCreate
+      volumeMounts: 
+        - name: mydir
+          mountPath: /mount
+      env: 
+        ENVVAR: 'value'
+
+########
+# Jobs #
+########
+
+jobs:
+  enabled: true
+  jobs: 
+    - name: hgu
+      image: redis
+      command: "sh"
+      args: ["-c", "sleep 1000"]
+      volumes: 
+        - name: mydir
+          hostPath:
+            # Ensure the file directory is created.
+            path: /var/local/aaa
+            type: DirectoryOrCreate
+      volumeMounts: 
+        - name: mydir
+          mountPath: /mount
+      env: 
+        ENVVAR: 'value'
+      extraAnnotations: 
+        annotation: value

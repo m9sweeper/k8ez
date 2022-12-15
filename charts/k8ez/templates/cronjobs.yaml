@@ -1,0 +1,84 @@
+{{- if .Values.cronJobs.enabled }}
+{{- range .Values.cronJobs.scheduled }}
+---
+{{- if $.Capabilities.APIVersions.Has "batch/v1/CronJob" -}}
+apiVersion: batch/v1
+{{- else -}}
+apiVersion: batch/v1beta1
+{{- end }}
+kind: CronJob
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ $.Release.Name }}
+    chart: {{ include "chart.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+    version: {{ $.Chart.Version }}
+spec:
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+            checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+{{- if eq $.Values.ingress.istio.mtlsMode "STRICT"}}
+            sidecar.istio.io/inject: "true"
+{{- end }}
+        spec:
+          {{if $.Values.imagePullSecrets}}
+          {{- with $.Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{ end }}
+          serviceAccount: {{ $.Release.Name }}
+          containers:
+            - name: {{ .name }}
+              image: "{{ or .image $.Values.image.image }}"
+              securityContext: 
+{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 16}}
+{{if .resources}}
+              resources:
+{{ toYaml .Values.resources | indent 14 }}
+{{- end }}
+{{- if .volumeMounts }}
+              volumeMounts:
+{{ toYaml .volumeMounts | indent 14 }}
+{{- end }}
+{{ if .command }}
+              command: [{{ .command | quote }}]
+{{- end }}
+{{ if .args }}
+              args: 
+{{ toYaml .args | indent 14 }}
+{{- end }}
+{{ if .env }}
+              env: 
+{{- range $k, $v := .env }}
+              - name: {{ $k | quote}}
+                value: {{ $v | quote }}
+{{- end }}
+{{- end }}
+              envFrom:
+{{ if $.Values.configData }}
+              - configMapRef:
+                  name: {{ $.Release.Name }}
+{{- end }}
+{{ if $.Values.secretData }}
+              - secretRef:
+                  name: {{ $.Release.Name }}
+{{- end }}
+          restartPolicy: {{ or .restartPolicy "Never" }}
+{{- if .volumes }}
+          volumes:
+{{ toYaml .volumes | indent 10 }}
+{{- end }}
+  schedule: {{ .schedule | quote }}
+
+
+
+{{- end }}
+{{- end }}

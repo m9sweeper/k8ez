@@ -1,0 +1,55 @@
+{{- if .Values.ingressgateway.enabled -}}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    chart: {{ include "chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    version: {{ .Chart.Version }}
+spec:
+{{- with .Values.ingressgateway.gateways }}
+  gateways:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- with .Values.ingressgateway.hosts }}
+  hosts:
+{{ toYaml . | indent 4 }}
+{{- end }}
+  http:
+  - match:
+{{- range .Values.ingressgateway.paths }}
+    - uri:
+       prefix: {{ . }}
+{{- end }}
+    route:
+    - destination:
+        host: {{ .Release.Name }}
+        port:
+          number: {{ .Values.service.port }}
+
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    chart: {{ include "chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    version: {{ .Chart.Version }}
+spec:
+  host: {{ .Release.Name }}
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+         httpCookie:
+           name: user
+           ttl: 300s
+{{- end }}
+

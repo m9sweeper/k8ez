@@ -1,0 +1,68 @@
+{{- if .Values.jobs.enabled }}
+{{- range .Values.jobs.jobs }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .name }}
+{{ if .extraAnnotations }}
+{{- with .extraAnnotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+{{- end }}
+{{ end }}
+spec:
+  template:
+    spec:
+      {{if $.Values.imagePullSecrets}}
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      serviceAccount: {{ $.Release.Name }}
+      containers:
+      - name: {{ .name }}
+        image: "{{ or .image $.Values.image.image }}"
+        securityContext: 
+{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 12}}
+{{if .resources}}
+        resources:
+{{ toYaml .Values.resources | indent 8 }}
+{{- end }}
+{{- if .volumeMounts }}
+        volumeMounts:
+{{ toYaml .volumeMounts | indent 8 }}
+{{- end }}
+{{ if .command }}
+        command: [{{ .command | quote}}]
+{{- end }}
+{{ if .args }}
+        args: 
+{{ toYaml .args | indent 8 }}
+{{- end }}
+{{ if .env }}
+        env: 
+{{- range $k, $v := .env }}
+        - name: {{ $k | quote}}
+          value: {{ $v | quote }}
+{{- end }}
+{{- end }}
+        envFrom:
+{{ if $.Values.configData }}
+          - configMapRef:
+              name: {{ $.Release.Name }}
+{{- end }}
+{{ if $.Values.secretData }}
+          - secretRef:
+              name: {{ $.Release.Name }}
+{{- end }}
+      restartPolicy: {{ or .restartPolicy "Never" }}
+{{- if .volumes }}
+      volumes:
+{{ toYaml .volumes | indent 6 }}
+{{- end }}
+  backoffLimit: 0
+
+{{- end }}
+{{- end }}

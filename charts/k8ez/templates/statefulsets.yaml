@@ -1,0 +1,135 @@
+{{- if .Values.statefulSets.enabled -}}
+{{- range .Values.statefulSets.statefulsets }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name  }}
+    chart: {{ include "chart.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+    version: {{ $.Chart.Version }}
+spec:
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+      release: {{ $.Release.Name }}
+  serviceName: {{ .name }}
+  template:
+    metadata:
+      annotations:
+        checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+        checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+{{- if not $.Values.ingressgateway.enabled }}
+        sidecar.istio.io/inject: "false"
+{{- end }}
+      labels:
+        app: {{ .name }}
+        chart: {{ include "chart.chart" $ }}
+        release: {{ $.Release.Name }}
+        heritage: {{ $.Release.Service }}
+        version: {{ $.Chart.Version }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - {{ .name }}
+                  - key: release
+                    operator: In
+                    values:
+                    - {{ $.Release.Name }}
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: {{ .name }}
+          image: "{{ or .image $.Values.image.image }}"
+          securityContext: 
+{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 12}}
+{{ if .command }}
+          command: [{{ .command | quote}}]
+{{- end }}
+{{ if .args }}
+          args: 
+{{ toYaml .args | indent 10 }}
+{{- end }}
+          ports:
+            - containerPort: {{ .port }}
+{{ if .env }}
+          env: 
+{{- range $k, $v := .env }}
+          - name: {{ $k | quote}}
+            value: {{ $v | quote }}
+{{- end }}
+{{- end }}
+          envFrom:
+{{ if $.Values.configData }}
+          - configMapRef:
+              name: {{ $.Release.Name }}
+{{- end }}
+{{ if $.Values.secretData }}
+          - secretRef:
+              name: {{ $.Release.Name }}
+{{- end }}
+{{- if .volumeMounts }}
+          volumeMounts:
+{{ toYaml .volumeMounts | indent 10 }}
+{{- end }}
+{{if .resources}}
+          resources:
+{{ toYaml .Values.resources | indent 10 }}
+{{- end }}
+{{- with $.Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with $.Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with $.Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- if .volumes }}
+      volumes:
+{{ toYaml .volumes | indent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+
+
+{{- if .Values.statefulSets.enabled -}}
+{{- range .Values.statefulSets.statefulsets }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+    chart: {{ include "chart.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+    version: {{ $.Chart.Version }}
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ or .targetPort .port }}
+      name: http
+  selector:
+    app: {{ .name }}
+{{- end }}
+{{- end }}

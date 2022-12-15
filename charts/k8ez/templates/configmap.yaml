@@ -1,0 +1,15 @@
+{{ if .Values.configData }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    chart: {{ include "chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    version: {{ .Chart.Version }}
+data:
+{{ toYaml .Values.configData | indent 2 }}
+{{ end }}

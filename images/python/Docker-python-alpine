@@ -1,0 +1,23 @@
+FROM python:3.7.13-alpine
+
+RUN apt-get clean && apt-get update -y && apt-get install -yq python3-pip python3-dev libcairo2-dev
+
+WORKDIR /usr/src/app
+
+# Add and install Python modules.
+COPY requirements.txt ./requirements.txt
+RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
+
+COPY . .
+
+# Create non root user
+RUN addgroup -g 1050 -S limitedaccessaccount && \
+    adduser -u 1050 -S limitedaccessaccount -G limitedaccessaccount
+
+# Set non root user
+USER 1050
+
+EXPOSE 5000
+
+ENTRYPOINT [ "python", "main.py" ]
+

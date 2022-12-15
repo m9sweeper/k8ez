@@ -1,0 +1,161 @@
+{{- if .Values.extraDeployment.enabled -}}
+{{- range .Values.extraDeployment.deployments }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+    chart: {{ include "chart.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+    version: {{ $.Chart.Version }}
+spec:
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+        checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+{{- if not $.Values.ingressgateway.enabled }}
+        sidecar.istio.io/inject: "false"
+{{- end }}
+      labels:
+        app: {{ .name }}
+        chart: {{ include "chart.chart" $ }}
+        release: {{ $.Release.Name }}
+        heritage: {{ $.Release.Service }}
+        version: {{ $.Chart.Version }}
+    spec:
+      {{if $.Values.imagePullSecrets}}
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      serviceAccount: {{ $.Release.Name }}
+      containers:
+        - name: "{{ .name }}"
+          image: "{{ or .image $.Values.image.image }}"
+          securityContext: 
+{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 12}}
+{{ if .command }}
+          command: [{{ .command | quote }}]
+{{- end }}
+{{ if .args }}
+          args: 
+{{ toYaml .args | indent 10 }}
+{{- end }}
+{{ if .env }}
+          env: 
+{{- range $k, $v := .env }}
+          - name: {{ $k | quote}}
+            value: {{ $v | quote }}
+{{- end }}
+{{- end }}
+          envFrom:
+{{ if $.Values.configData }}
+          - configMapRef:
+              name: {{ $.Release.Name }}
+{{- end }}
+{{ if $.Values.secretData }}
+          - secretRef:
+              name: {{ $.Release.Name }}
+{{- end }}
+          ports:
+            - containerPort: {{ .port }}
+{{- with $.Values.livenessProbe }}
+          livenessProbe:
+{{ toYaml . | indent 12 }}
+{{- end }}
+{{- with $.Values.readinessProbe }}
+          readinessProbe:
+{{ toYaml . | indent 12 }}
+{{- end }}
+{{- if .volumeMounts }}
+          volumeMounts:
+{{ toYaml .volumeMounts | indent 10 }}
+{{- end }}
+{{if .resources}}
+          resources:
+{{ toYaml .Values.resources | indent 10 }}
+{{- end }}
+{{- with $.Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with $.Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with $.Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- if .volumes }}
+      volumes:
+{{ toYaml .volumes | indent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+
+
+{{- if .Values.extraDeployment.hpaExtra.enabled -}}
+{{- range .Values.extraDeployment.deployments }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .name }}
+  minReplicas: {{ .minPods }}
+  maxReplicas: {{ .maxPods }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .cpuAverageUtilizationThreshold }}
+{{- end }}
+{{- end }}
+
+
+
+
+{{- if .Values.extraDeployment.enabled -}}
+{{- range .Values.extraDeployment.deployments }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+    chart: {{ include "chart.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+    version: {{ $.Chart.Version }}
+spec:
+  type: {{ .serviceType }}
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ or .targetPort .port }}
+      name: http
+  selector:
+    app: {{ .name }}
+    release: {{ $.Release.Name }}
+{{- end }}
+{{- end }}
+

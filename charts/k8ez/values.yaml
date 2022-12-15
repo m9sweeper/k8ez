@@ -1,0 +1,226 @@
+#########################################################
+# Define the main deployment of the app                 #
+#########################################################
+
+# Image and any required credentials to download it for the default deployment
+image:
+  image: ""
+  pullPolicy: Always
+  credentials:
+    create: false
+    username: ""
+    password: ""
+    secretRef: ""
+
+# Default security contetx
+securityContext: 
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  privileged: false
+
+# Specify image pull secrets if required or if you have it creating registry credentials
+# imagePullSecrets: 
+# - name: Release.name--registry-secret
+
+# Enable deployment - by default we enable a simple deployment
+deployment: 
+  enabled: true
+  # command: "sh"
+  # args: []
+
+# Configure the number of pods for this service.  If autoscale is enabled, replica count is not used.
+replicaCount: 1
+autoscale:
+  enabled: false
+  minPods: 2
+  maxPods: 4
+  cpuAverageUtilizationThreshold: 70
+
+podDisruptionBudget: 
+  enabled: false
+
+# Enable and configure a service with a reasonable default port
+service:
+  type: ClusterIP
+  port: 80
+
+# Configure resources it will be given with reasonable defaults
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+# pod liveness and readiness probes to check the applications health
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+livenessProbe: {}
+  # httpGet:
+  #   path: /health
+  #   port: 8080
+  #   httpHeaders:
+  #   - name: Custom-Header
+  #     value: Awesome
+  # initialDelaySeconds: 3
+  # periodSeconds: 3
+
+readinessProbe: {}
+
+# List key/value pairs to be included in this service's ConfigMap
+configData: {}
+  #K8EZ: 'YES'
+
+# Set secret data key-value pairs that will be loaded into env variables
+secretData: {}
+
+# See https://kubernetes.io/docs/concepts/storage/volumes/
+volumes: []
+  # - name: mydir
+  #   hostPath:
+  #     # Ensure the file directory is created.
+  #     path: /var/local/aaa
+  #     type: DirectoryOrCreate
+
+volumeMounts: []
+  # - name: myvolume
+  #   mountPath: /mount
+
+# See https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+persistentVolumeClaims: []
+# - name: myvolumeclaim
+#   accessMode: ReadWriteMany
+#   storageClassName: default
+#   resources:
+#     requests:
+#       storage: 1Gi
+
+# Possibly select a certain type of node
+nodeSelector: {}
+
+# Set tolerations
+tolerations: []
+
+# Set pod affinity
+affinity: {}
+
+###########
+# Ingress #
+###########
+
+# Kubernetes native ingress and Istio are supported, only enable one or neither of them.
+# If you enable neither you will need to port-forward to dash
+ingress:
+  hosts: []
+    # Add lists of hosts
+    # - example.local
+    #- "localhost"
+  path: /
+
+  # Deploys a Kubernetes Ingress resource
+  k8sIngress:
+    enabled: false
+    annotations:
+      # kubernetes.io/ingress.class: gce
+      kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      # kubernetes.io/ingress.allow-http: false
+      # kubernetes.io/tls-acme: true
+    tls: []
+      # Secrets must be manually created in the namespace.
+      # - secretName: dash-certificate
+      #   hosts:
+      #     - example.local
+  # Deploys an Istio VirtualService, DestinationRule, Gateway (optional), PeerAuthentication (optional)
+  istio:
+    enabled: false
+    loadBalancerType: ROUND_ROBIN
+    mtlsMode: "PERMISSIVE"
+
+ingressgateway:
+  enabled: false
+  gateways: []
+  hosts: []
+  paths:
+    - /
+  loadBalancerType: ROUND_ROBIN
+
+#########################################################
+# Stateful Sets                                         #
+#########################################################
+
+statefulSets:
+  enabled: false
+  statefulsets: []
+    # - name: abcd
+    #   image: nginx
+    #   port: 4000
+    #   serviceType: "ClusterIP"
+    #   replicaCount: 1
+    #   command: "sh"
+    #   args: []
+    #   volumes: []
+    #   volumeMounts: []
+    #   env: {} # additional env vars
+    #   securityContext: {}
+
+#############################################################
+# Additional Deployments                                    #
+#############################################################
+
+extraDeployment:
+  enabled: false
+  hpaExtra: # autoscaling
+    enabled: false
+  deployments: []
+    # - name: abcde
+    #   image: nginx
+    #   port: 4000
+    #   targetPort: 8080
+    #   serviceType: "ClusterIP"
+    #   replicaCount: 1
+    #   command: "sh"
+    #   args: []
+    #   volumes: []
+    #   volumeMounts: []
+    #   env: {} # additional env vars
+    #   securityContext: {}
+    #   
+    #   minPods: 2
+    #   maxPods: 4
+    #   cpuAverageUtilizationThreshold: 70
+
+
+############
+# CronJobs #
+############
+
+cronJobs:
+  enabled: false
+  scheduled: []
+    # - name: abc
+    #   image: nginx
+    #   schedule: "30 * * * *" # every 30 min
+    #   command: "sh"
+    #   args: []
+    #   volumes: []
+    #   volumeMounts: []
+    #   env: {} # additional env vars
+    #   securityContext: {}
+
+########
+# Jobs #
+########
+
+jobs:
+  enabled: false
+  jobs: []
+    # - name: hgu
+    #   image: nginx
+    #   command: "sh"
+    #   #args: []
+    #   #volumes: []
+    #   #volumeMounts: []
+    #   #env: {} # additional env vars
+    #   #extraAnnotations: {} # additional annotations
+    #   securityContext: {}

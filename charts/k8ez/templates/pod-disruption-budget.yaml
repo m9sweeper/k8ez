@@ -1,0 +1,21 @@
+{{ if .Values.podDisruptionBudget.enabled}}
+{{- if or (and (gt (.Values.replicaCount | int) 1) (not .Values.autoscale.enabled)) (and .Values.autoscale.enabled .Values.autoscale.maxPods (gt (.Values.autoscale.minPods | int) 1)) }}
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    chart: {{ include "chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    version: {{ .Chart.Version }}
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      release: {{ .Release.Name }}
+{{- end }}
+{{ end }}

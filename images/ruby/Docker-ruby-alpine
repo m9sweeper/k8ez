@@ -1,0 +1,27 @@
+FROM ruby:3.1.2-alpine
+
+# Install any dependencies for building & commands to use
+RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
+
+WORKDIR /usr/src/app
+
+COPY Gemfile .
+COPY Gemfile.lock .
+
+## Preinstall gems. This will ensure that Gem Cache wont drop on code change
+RUN (bundle check || bundle install)
+
+COPY . .
+
+# Create non root user
+RUN addgroup -g 1050 -S limitedaccessaccount && \
+    adduser -u 1050 -S limitedaccessaccount -G limitedaccessaccount
+
+# Set non root user
+USER 1050
+
+EXPOSE 3000
+
+# Configure the main process to run when running the image
+CMD ["rails", "server", "-b", "0.0.0.0"]
+
