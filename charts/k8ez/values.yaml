@@ -12,11 +12,22 @@ image:
     password: ""
     secretRef: ""
 
-# Default security contetx
-securityContext: 
+# Default security context
+# container context, compliant with Pod Security Standard "restricted"
+securityContext:
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   privileged: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+  runAsGroup: 1050
+  runAsUser: 1050
+
+# pod context (inherited by all containers)
+podSecurityContext:
+  fsGroup: 1050
 
 # Specify image pull secrets if required or if you have it creating registry credentials
 # imagePullSecrets: 
@@ -42,7 +53,7 @@ podDisruptionBudget:
 # Enable and configure a service with a reasonable default port
 service:
   type: ClusterIP
-  port: 80
+  port: 8080
 
 # Configure resources it will be given with reasonable defaults
 resources:
@@ -74,6 +85,24 @@ configData: {}
 # Set secret data key-value pairs that will be loaded into env variables
 secretData: {}
 
+# List of files to load into configmaps.  Supports glob patterns, all files that match will be put into the configmap
+configFiles: []
+  # - fileGlob: files/config.toml
+  #   configMapName: config.toml
+
+# List of extra annotations to be injected into pod templates
+extraAnnotations: {}
+# A potential use of these would be to implement Hashicorp's Vault Agent
+  # vault.hashicorp.com/agent-inject: "true"
+  # vault.hashicorp.com/agent-pre-populate: "true"
+  # vault.hashicorp.com/agent-pre-populate-only: "true"
+  # vault.hashicorp.com/agent-init-first: "true"
+  # vault.hashicorp.com/role: "my-role"
+  # vault.hashicorp.com/agent-inject-secret-vault.env: "secrets/data/my-secret"
+  # vault.hashicorp.com/agent-inject-template-vault.env: |
+  #   {{- with secret "secrets/data/my-secret/app" -}}
+  #   key = "{{.Data.data.my_secret.value -}}"
+
 # See https://kubernetes.io/docs/concepts/storage/volumes/
 volumes: []
   # - name: mydir
@@ -87,13 +116,11 @@ volumeMounts: []
   #   mountPath: /mount
 
 # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-persistentVolumeClaims: []
-# - name: myvolumeclaim
-#   accessMode: ReadWriteMany
-#   storageClassName: default
-#   resources:
-#     requests:
-#       storage: 1Gi
+persistentVolumeClaims:
+  # - name: efs
+  #   accessMode: ReadWriteMany
+  #   storageClass: my-storage-class
+  #   size: 50Gi
 
 # Possibly select a certain type of node
 nodeSelector: {}
@@ -104,46 +131,50 @@ tolerations: []
 # Set pod affinity
 affinity: {}
 
+# sets whether containers get the kubernetes generated env vars for addresses to other services in the same namespace
+enableServiceLinks: true
+
 ###########
 # Ingress #
 ###########
 
-# Kubernetes native ingress and Istio are supported, only enable one or neither of them.
-# If you enable neither you will need to port-forward to dash
-ingress:
+# Deploys a Kubernetes Ingress resource, defaults to nginx ingress controller.
+# If networking.k8s.io/v1 is available in your cluster that will be used,
+# otherwise fall back to networking.k8s.io/v1
+k8sIngress:
+  enabled: false
   hosts: []
     # Add lists of hosts
     # - example.local
     #- "localhost"
   path: /
+  annotations:
+    # kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # kubernetes.io/ingress.allow-http: false
+    # kubernetes.io/tls-acme: true
+  tls: []
+    # Secrets must be manually created in the namespace.
+    # - secretName: dash-certificate
+    #   hosts:
+    #     - example.local
 
-  # Deploys a Kubernetes Ingress resource
-  k8sIngress:
-    enabled: false
-    annotations:
-      # kubernetes.io/ingress.class: gce
-      kubernetes.io/ingress.class: nginx
-      # nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      # kubernetes.io/ingress.allow-http: false
-      # kubernetes.io/tls-acme: true
-    tls: []
-      # Secrets must be manually created in the namespace.
-      # - secretName: dash-certificate
-      #   hosts:
-      #     - example.local
-  # Deploys an Istio VirtualService, DestinationRule, Gateway (optional), PeerAuthentication (optional)
-  istio:
-    enabled: false
-    loadBalancerType: ROUND_ROBIN
-    mtlsMode: "PERMISSIVE"
-
-ingressgateway:
+# Deploys an Istio VirtualService and DestinationRule
+istio:
   enabled: false
   gateways: []
   hosts: []
-  paths:
-    - /
+  paths: []
   loadBalancerType: ROUND_ROBIN
+  useCustomLoadBalancer: false
+  customLoadBalancer: {}
+    # consistentHash:
+    #   httpCookie:
+    #     name: my_cookie_name
+    #     ttl: 300s
+  mtls:
+    enabled: false
 
 #########################################################
 # Stateful Sets                                         #

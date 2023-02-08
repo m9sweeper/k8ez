@@ -1,4 +1,4 @@
-{{- if .Values.ingress.k8sIngress.enabled -}}
+{{- if .Values.k8sIngress.enabled -}}
 ---
 {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" -}}
 apiVersion: networking.k8s.io/v1
@@ -16,14 +16,14 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     version: {{ .Chart.Version }}
-  {{- with .Values.ingress.k8sIngress.annotations }}
+  {{- with .Values.k8sIngress.annotations }}
   annotations:
     {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.ingress.k8sIngress.tls }}
+  {{- if .Values.k8sIngress.tls }}
   tls:
-    {{- range .Values.ingress.k8sIngress.tls }}
+    {{- range .Values.k8sIngress.tls }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -32,12 +32,12 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-  {{- if .Values.ingress.hosts }}
-    {{- range .Values.ingress.hosts }}
+  {{- if .Values.hosts }}
+    {{- range .Values.hosts }}
     - host: {{ . }}
       http:
         paths:
-        - path: {{ $.Values.ingress.path }}
+        - path: {{ $.Values.path }}
         {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:

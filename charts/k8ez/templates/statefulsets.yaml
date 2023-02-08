@@ -23,8 +23,11 @@ spec:
       annotations:
         checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
         checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
-{{- if not $.Values.ingressgateway.enabled }}
+{{- if not $.Values.istio.enabled }}
         sidecar.istio.io/inject: "false"
+{{- end }}
+{{- if $.Values.extraAnnotations }}
+{{ toYaml $.Values.extraAnnotations | indent 8 }}
 {{- end }}
       labels:
         app: {{ .name }}
@@ -33,6 +36,9 @@ spec:
         heritage: {{ $.Release.Service }}
         version: {{ $.Chart.Version }}
     spec:
+      enableServiceLinks: {{ $.Values.enableServiceLinks }}
+      securityContext:
+        fsGroup: {{ $.Values.podSecurityContext.fsGroup }}
       terminationGracePeriodSeconds: 10
       affinity:
         podAntiAffinity:
@@ -86,7 +92,7 @@ spec:
 {{- end }}
 {{if .resources}}
           resources:
-{{ toYaml .Values.resources | indent 10 }}
+{{ toYaml $.Values.resources | indent 10 }}
 {{- end }}
 {{- with $.Values.nodeSelector }}
       nodeSelector:
@@ -108,10 +114,8 @@ spec:
 {{- end }}
 
 
-
-
-{{- if .Values.statefulSets.enabled -}}
-{{- range .Values.statefulSets.statefulsets }}
+{{- if $.Values.statefulSets.enabled -}}
+{{- range $.Values.statefulSets.statefulsets }}
 ---
 apiVersion: v1
 kind: Service
@@ -133,3 +137,4 @@ spec:
     app: {{ .name }}
 {{- end }}
 {{- end }}
+

@@ -1,0 +1,19 @@
+{{ range .Values.configFiles }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .configMapName }}
+  labels:
+    app: {{ $.Release.Name }}
+    chart: {{ include "chart.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+    version: {{ $.Chart.Version }}
+data: 
+{{- range $path, $_ := $.Files.Glob .fileGlob }}
+{{- $path | base | nindent 2 }}: |-
+{{- $.Files.Get $path | nindent 4 }}
+{{- end }}
+{{- end }}
+
