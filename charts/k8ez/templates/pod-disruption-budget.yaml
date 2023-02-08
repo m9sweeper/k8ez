@@ -1,7 +1,7 @@
 {{ if .Values.podDisruptionBudget.enabled}}
 {{- if or (and (gt (.Values.replicaCount | int) 1) (not .Values.autoscale.enabled)) (and .Values.autoscale.enabled .Values.autoscale.maxPods (gt (.Values.autoscale.minPods | int) 1)) }}
 ---
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ .Release.Name }}
