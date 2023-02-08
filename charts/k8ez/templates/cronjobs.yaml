@@ -16,16 +16,17 @@ metadata:
     heritage: {{ $.Release.Service }}
     version: {{ $.Chart.Version }}
 spec:
-  concurrencyPolicy: Replace
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
         metadata:
           annotations:
-            checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
-            checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
-{{- if eq $.Values.ingress.istio.mtlsMode "STRICT"}}
-            sidecar.istio.io/inject: "true"
+{{- if not $.Values.istio.enabled }}
+            sidecar.istio.io/inject: "false"
+{{- end }}
+{{- if $.Values.extraAnnotations }}
+{{ toYaml $.Values.extraAnnotations | indent 12 }}
 {{- end }}
         spec:
           {{if $.Values.imagePullSecrets}}
@@ -35,6 +36,9 @@ spec:
           {{- end }}
           {{ end }}
           serviceAccount: {{ $.Release.Name }}
+          enableServiceLinks: {{ $.Values.enableServiceLinks }}
+          securityContext:
+            fsGroup: {{ $.Values.podSecurityContext.fsGroup }}
           containers:
             - name: {{ .name }}
               image: "{{ or .image $.Values.image.image }}"
@@ -42,7 +46,7 @@ spec:
 {{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 16}}
 {{if .resources}}
               resources:
-{{ toYaml .Values.resources | indent 14 }}
+{{ toYaml $.Values.resources | indent 14 }}
 {{- end }}
 {{- if .volumeMounts }}
               volumeMounts:
@@ -77,8 +81,6 @@ spec:
 {{ toYaml .volumes | indent 10 }}
 {{- end }}
   schedule: {{ .schedule | quote }}
-
-
 
 {{- end }}
 {{- end }}

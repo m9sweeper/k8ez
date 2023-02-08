@@ -13,6 +13,14 @@ metadata:
 {{ end }}
 spec:
   template:
+    metadata:
+      annotations:
+{{- if not $.Values.istio.enabled }}
+        sidecar.istio.io/inject: "false"
+{{- end }}
+{{- if $.Values.extraAnnotations }}
+{{ toYaml $.Values.extraAnnotations | indent 8 }}
+{{- end }}
     spec:
       {{if $.Values.imagePullSecrets}}
       {{- with $.Values.imagePullSecrets }}
@@ -21,6 +29,9 @@ spec:
       {{- end }}
       {{- end }}
       serviceAccount: {{ $.Release.Name }}
+      enableServiceLinks: {{ $.Values.enableServiceLinks }}
+      securityContext:
+        fsGroup: {{ $.Values.podSecurityContext.fsGroup }}
       containers:
       - name: {{ .name }}
         image: "{{ or .image $.Values.image.image }}"
@@ -28,7 +39,7 @@ spec:
 {{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 12}}
 {{if .resources}}
         resources:
-{{ toYaml .Values.resources | indent 8 }}
+{{ toYaml $.Values.resources | indent 8 }}
 {{- end }}
 {{- if .volumeMounts }}
         volumeMounts:

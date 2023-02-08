@@ -1,4 +1,4 @@
-{{- if .Values.ingressgateway.enabled -}}
+{{- if .Values.istio.enabled -}}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -11,17 +11,17 @@ metadata:
     heritage: {{ .Release.Service }}
     version: {{ .Chart.Version }}
 spec:
-{{- with .Values.ingressgateway.gateways }}
+{{- with .Values.istio.gateways }}
   gateways:
 {{ toYaml . | indent 4 }}
 {{- end }}
-{{- with .Values.ingressgateway.hosts }}
+{{- with .Values.istio.hosts }}
   hosts:
 {{ toYaml . | indent 4 }}
 {{- end }}
   http:
   - match:
-{{- range .Values.ingressgateway.paths }}
+{{- range .Values.istio.paths }}
     - uri:
        prefix: {{ . }}
 {{- end }}
@@ -47,9 +47,13 @@ spec:
   host: {{ .Release.Name }}
   trafficPolicy:
     loadBalancer:
-      consistentHash:
-         httpCookie:
-           name: user
-           ttl: 300s
+{{- if .Values.istio.useCustomLoadBalancer -}}
+  {{ toYaml .Values.istio.customLoadBalancer | nindent 6 }}
+{{- else }}
+      simple: {{ .Values.istio.loadBalancerType }}
 {{- end }}
-
+{{- if .Values.istio.mtls.enabled }}
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}
+{{- end }}
