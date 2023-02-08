@@ -131,6 +131,9 @@ tolerations: []
 # Set pod affinity
 affinity: {}
 
+# sets whether containers get the kubernetes generated env vars for addresses to other services in the same namespace
+enableServiceLinks: true
+
 ###########
 # Ingress #
 ###########
