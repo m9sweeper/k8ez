@@ -97,10 +97,10 @@ extraAnnotations: {}
   # vault.hashicorp.com/agent-pre-populate: "true"
   # vault.hashicorp.com/agent-pre-populate-only: "true"
   # vault.hashicorp.com/agent-init-first: "true"
-  # vault.hashicorp.com/role: "cats-prod"
+  # vault.hashicorp.com/role: "my-role"
   # vault.hashicorp.com/agent-inject-secret-vault.env: "secrets/data/my-secret"
   # vault.hashicorp.com/agent-inject-template-vault.env: |
-  #   {{- with secret "secrets/data/my-secret" -}}
+  #   {{- with secret "secrets/data/my-secret/app" -}}
   #   key = "{{.Data.data.my_secret.value -}}"
 
 # See https://kubernetes.io/docs/concepts/storage/volumes/
