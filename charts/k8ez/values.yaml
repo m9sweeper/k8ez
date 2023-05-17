@@ -123,11 +123,11 @@ extraAnnotations: {}
 
 # See https://kubernetes.io/docs/concepts/storage/volumes/
 volumes: []
-  # - name: mydir
-  #   hostPath:
-  #     # Ensure the file directory is created.
-  #     path: /var/local/aaa
-  #     type: DirectoryOrCreate
+#   - name: mydir
+#     hostPath:
+#       # Ensure the file directory is created.
+#       path: /var/local/aaa
+#       type: DirectoryOrCreate
 
 volumeMounts: []
   # - name: myvolume
@@ -218,30 +218,38 @@ statefulSets:
 extraDeployment:
   enabled: false
   hpaExtra: # autoscaling
-    enabled: false
-  deployments: []
-    # - name: abcde
-    #   image: nginx
-    #   port: 4000
-    #   targetPort: 8080
-    #   serviceType: "ClusterIP"
-    #   replicaCount: 1
-    #   command: "sh"
-    #   args: []
-    #   volumes: []
-    #   volumeMounts: []
-    #   env: {} # additional env vars
-    #   securityContext: {}
-    #   
-    #   minPods: 2
-    #   maxPods: 4
-    #   cpuAverageUtilizationThreshold: 70
+    enabled: true
+  deployments:
+     - name: nginx
+       replicaCount: 1
+       excludeGlobalExtraAnnotations: true  # false if unset
+       extraAnnotations:
+         testing: 1234
+       image:
+         registry: nginx
+         tag: latest
+         pullPolicy: always
+       port: 4000
+       targetPort: 8080
+       serviceType: "ClusterIP"
+       command: "sh"
+       args: ["test", "me"]
+       excludeGlobalVolumes: true  # false if unset
+       volumes: []
+       volumeMounts: []
+       resources: {}  # will default to global resources
+       env: # additional env vars
+        ENV_VAR_1: "my env var"
+       securityContext:
+         testing: 5678
+       minPods: 2
+       maxPods: 4
+       cpuAverageUtilizationThreshold: 70
 
 
 ############
 # CronJobs #
 ############
-
 cronJobs:
   enabled: false
   scheduled: []

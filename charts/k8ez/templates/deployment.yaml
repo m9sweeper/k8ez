@@ -80,12 +80,12 @@ spec:
           envFrom:
           {{- if $.Values.configData }}
           - configMapRef:
-              name: {{ include "chart.fullname" . }}
+              name: {{ include "chart.fullname" $ }}
           {{- end }}
 
           {{- if $.Values.secretData }}
           - secretRef:
-              name: {{ include "chart.fullname" . }}
+              name: {{ include "chart.fullname" $ }}
           {{- end }}
           {{- end }}
 
