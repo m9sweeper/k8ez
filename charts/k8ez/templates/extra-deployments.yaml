@@ -188,15 +188,15 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ $deploymentFullName }}
-  minReplicas: {{ required "if an extraDeployment has hpaExtra enabled, minPods and maxPods must be set" .minPods }}
-  maxReplicas: {{ required "if an extraDeployment has hpaExtra enabled, minPods and maxPods must be set" .maxPods }}
+  minReplicas: {{ required "if extraDeployment has hpaExtra enabled, each deployment must have minPods and maxPods set" .minPods }}
+  maxReplicas: {{ required "if extraDeployment has hpaExtra enabled, each deployment must have minPods and maxPods set" .maxPods }}
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: {{ required "if an extraDeployment has hpaExtra enabled, cpuAverageUtilizationThreshold must be set" .cpuAverageUtilizationThreshold }}
+        averageUtilization: {{ required "if extraDeployment has hpaExtra enabled, each deployment must have cpuAverageUtilizationThreshold set" .cpuAverageUtilizationThreshold }}
 {{- end }}
 {{- end }}
 

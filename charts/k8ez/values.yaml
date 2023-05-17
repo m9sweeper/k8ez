@@ -218,33 +218,33 @@ statefulSets:
 extraDeployment:
   enabled: false
   hpaExtra: # autoscaling
-    enabled: true
-  deployments:
-     - name: nginx
-       replicaCount: 1
-       excludeGlobalExtraAnnotations: true  # false if unset
-       extraAnnotations:
-         testing: 1234
-       image:
-         registry: nginx
-         tag: latest
-         pullPolicy: always
-       port: 4000
-       targetPort: 8080
-       serviceType: "ClusterIP"
-       command: "sh"
-       args: ["test", "me"]
-       excludeGlobalVolumes: true  # false if unset
-       volumes: []
-       volumeMounts: []
-       resources: {}  # will default to global resources
-       env: # additional env vars
-        ENV_VAR_1: "my env var"
-       securityContext:
-         testing: 5678
-       minPods: 2
-       maxPods: 4
-       cpuAverageUtilizationThreshold: 70
+    enabled: false
+  deployments: []
+#     - name: nginx
+#       replicaCount: 1
+#       excludeGlobalExtraAnnotations: true  # false if unset
+#       extraAnnotations:
+#         testing: 1234
+#       image:
+#         registry: nginx
+#         tag: latest
+#         pullPolicy: always
+#       port: 4000
+#       targetPort: 8080
+#       serviceType: "ClusterIP"
+#       command: "sh"
+#       args: ["test", "me"]
+#       excludeGlobalVolumes: true  # false if unset
+#       volumes: []
+#       volumeMounts: []
+#       resources: {}  # will default to global resources
+#       env: # additional env vars
+#        ENV_VAR_1: "my env var"
+#       securityContext:
+#         testing: 5678
+#       minPods: 2
+#       maxPods: 4
+#       cpuAverageUtilizationThreshold: 70
 
 
 ############
