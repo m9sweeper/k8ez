@@ -3,19 +3,19 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}
-  minReplicas: {{ .Values.autoscale.minPods }}
-  maxReplicas: {{ .Values.autoscale.maxPods }}
+    name: {{ include "chart.fullname" . }}
+  minReplicas: {{ required "If autoscaling is enabled, minPods, maxPods, and cpuAverageUtilizationThreshold must all be set" .Values.autoscale.minPods }}
+  maxReplicas: {{ required "If autoscaling is enabled, minPods, maxPods, and cpuAverageUtilizationThreshold must all be set" .Values.autoscale.maxPods }}
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: {{ .Values.autoscale.cpuAverageUtilizationThreshold }}
+        averageUtilization: {{ required "If autoscaling is enabled, minPods, maxPods, and cpuAverageUtilizationThreshold must all be set" .Values.autoscale.cpuAverageUtilizationThreshold }}
 {{- end }}

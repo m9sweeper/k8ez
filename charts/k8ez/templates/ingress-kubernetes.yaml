@@ -9,16 +9,12 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ include "chart.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    version: {{ .Chart.Version }}
+    {{- include "chart.basicLabels" . | nindent 4 }}
   {{- with .Values.k8sIngress.annotations }}
   annotations:
-    {{ toYaml . | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.k8sIngress.tls }}
@@ -32,24 +28,22 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-  {{- if .Values.hosts }}
-    {{- range .Values.hosts }}
+    {{- range (required "if .Values.k8sIngress.enabled is true, .Values.k8sIngress.hosts is required" .Values.k8sIngress.hosts) }}
     - host: {{ . }}
       http:
         paths:
-        - path: {{ $.Values.path }}
-        {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+        - path: {{ $.Values.k8sIngress.path }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ $.Release.Name }}
+              name: {{ include "chart.fullname" $ }}
               port:
                 number: {{ $.Values.service.port }}
-        {{- else }}
+          {{- else }}
           backend:
-            serviceName: {{ $.Release.Name }}
+            serviceName: {{ include "chart.fullname" $ }}
             servicePort: {{ $.Values.service.port }}
-        {{- end }}
+          {{- end }}
     {{- end }}
-  {{- end }}
 {{- end -}}
