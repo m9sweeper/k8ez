@@ -1,10 +1,14 @@
 #########################################################
 # Define the main deployment of the app                 #
 #########################################################
+# Overrides for the name
+nameOverride: ""
+fullNameOverride: ""
 
 # Image and any required credentials to download it for the default deployment
 image:
-  image: ""
+  registry: ""
+  tag: ""
   pullPolicy: Always
   credentials:
     create: false
@@ -36,8 +40,22 @@ podSecurityContext:
 # Enable deployment - by default we enable a simple deployment
 deployment: 
   enabled: true
-  # command: "sh"
-  # args: []
+  mainContainerNameOverride: ""
+  command: ""
+  args: []
+  # by default, disable initContainers
+  initContainers:
+    enabled: false
+    containers: []
+#      - name: migrations
+#        image:
+#          registry: "path/to/registry"
+#          tag: "my-tag"
+#          pullPolicy: always
+#        command: 'python'
+#        args: ['manage.py', 'migrate_schemas']
+#        securityContext: {}
+#        resources: {}
 
 # Configure the number of pods for this service.  If autoscale is enabled, replica count is not used.
 replicaCount: 1
@@ -179,7 +197,6 @@ istio:
 #########################################################
 # Stateful Sets                                         #
 #########################################################
-
 statefulSets:
   enabled: false
   statefulsets: []
@@ -198,7 +215,6 @@ statefulSets:
 #############################################################
 # Additional Deployments                                    #
 #############################################################
-
 extraDeployment:
   enabled: false
   hpaExtra: # autoscaling
