@@ -105,8 +105,8 @@ secretData: {}
 
 # List of files to load into configmaps.  Supports glob patterns, all files that match will be put into the configmap
 configFiles: []
-  # - fileGlob: files/config.toml
-  #   configMapName: config.toml
+#   - fileGlob: files/config.toml
+#     configMapName: config.toml
 
 # List of extra annotations to be injected into pod templates
 extraAnnotations: {}
@@ -251,17 +251,21 @@ extraDeployment:
 # CronJobs #
 ############
 cronJobs:
-  enabled: false
+  enabled: true
   scheduled: []
-    # - name: abc
-    #   image: nginx
-    #   schedule: "30 * * * *" # every 30 min
-    #   command: "sh"
-    #   args: []
-    #   volumes: []
-    #   volumeMounts: []
-    #   env: {} # additional env vars
-    #   securityContext: {}
+#    - name: abc
+#      image:
+#        registry: nginx
+#        tag: latest
+#        pullPolicy: always
+#      securityContext:
+#        testing: 1234
+#      schedule: "30 * * * *" # every 30 min
+#      command: "sh"
+#      args: []
+#      volumes: []
+#      volumeMounts: []
+#      env: {} # additional env vars
 
 ########
 # Jobs #
