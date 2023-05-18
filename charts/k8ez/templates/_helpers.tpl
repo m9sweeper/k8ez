@@ -73,7 +73,9 @@ Will include the global annotations unless specified
 Will include the resource-specific annotations
 */}}
 {{- define "chart.buildExtraAnnotations" -}}
-{{- if and .values.extraAnnotations (ne (lower (printf "%s" .excludeGlobalExtraAnnotations)) "true") }}
+{{- $excludeGlobalExtraAnnotationsAsString := (printf "%s" .excludeGlobalExtraAnnotations) }}
+{{- $excludeGlobalExtraAnnotationsAsLowercaseString := (lower $excludeGlobalExtraAnnotationsAsString) }}
+{{- if and .values.extraAnnotations (ne $excludeGlobalExtraAnnotationsAsLowercaseString "true") }}
 {{- toYaml .values.extraAnnotations | nindent 0 }}
 {{- end }}
 {{- if .extraAnnotations }}
