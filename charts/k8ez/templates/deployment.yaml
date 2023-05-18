@@ -60,7 +60,7 @@ spec:
         {{- range .Values.deployment.initContainers.containers }}
         - name: {{ required "A valid name for each initContainer is required!" .name }}
           image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) }}
-          {{- if (and .image .image.pullPolicy) }}
+          {{- if and .image (default dict .image).pullPolicy }}
           imagePullPolicy: {{ .image.pullPolicy }}
           {{- else }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
