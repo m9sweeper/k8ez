@@ -5,11 +5,6 @@ kind: Deployment
 metadata:
   name: {{ include "chart.fullname" . }}
   labels:
-    chartName: {{ .Chart.Name }}
-    includeChartName: {{ include "chart.name" . }}
-    nameOverride: {{ .Values.nameOverride }}
-    releaseName: {{ .Release.Name }}
-    includeChartFullName: {{ include "chart.fullname" . }}
     {{- include "chart.basicLabels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -58,7 +53,7 @@ spec:
       {{- if .Values.deployment.initContainers.enabled }}
       initContainers:
         {{- range .Values.deployment.initContainers.containers }}
-        - name: {{ required "A valid name for each initContainer is required!" .name }}
+        - name: {{ required "A valid name for each initContainer is required!" .name | lower }}
           image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) }}
           {{- if and .image (default dict .image).pullPolicy }}
           imagePullPolicy: {{ .image.pullPolicy }}
