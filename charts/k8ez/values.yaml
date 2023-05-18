@@ -72,6 +72,7 @@ podDisruptionBudget:
 service:
   type: ClusterIP
   port: 8080
+#  targetPort: 8080  # will use port by default
 
 # Configure resources it will be given with reasonable defaults
 resources:

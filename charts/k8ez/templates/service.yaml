@@ -9,7 +9,7 @@ spec:
   type: {{ required "Values.service requires a type" .Values.service.type }}
   ports:
     - port: {{ required "Values.service requires a port" .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
+      targetPort: {{ default .Values.service.port .Values.service.targetPort }}
       name: http
   selector:
     {{- include "chart.basicSelectorLabels" . | nindent 4 }}
