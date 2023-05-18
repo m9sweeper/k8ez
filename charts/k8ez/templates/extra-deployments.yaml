@@ -75,7 +75,8 @@ spec:
       containers:
         - name: {{ $deploymentFullName | quote }}
           image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) | quote }}
-          {{- if (dig "image" "pullPolicy" "" (default dict .image)) }}
+{{/*          {{- if (dig "image" "pullPolicy" "" (default dict .image)) }}*/}}
+          {{- if (and .image (default dict .image).pullPolicy) }}
           imagePullPolicy: {{ .image.pullPolicy }}
           {{- else }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
