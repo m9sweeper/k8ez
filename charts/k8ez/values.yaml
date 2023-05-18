@@ -125,15 +125,15 @@ extraAnnotations: {}
 
 # See https://kubernetes.io/docs/concepts/storage/volumes/
 volumes: []
-#   - name: mydir
-#     hostPath:
-#       # Ensure the file directory is created.
-#       path: /var/local/aaa
-#       type: DirectoryOrCreate
+#  - name: mydir
+#    hostPath:
+#      # Ensure the file directory is created.
+#      path: /var/local/aaa
+#      type: DirectoryOrCreate
 
 volumeMounts: []
-  # - name: myvolume
-  #   mountPath: /mount
+#  - name: myvolume
+#    mountPath: /mount
 
 # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 persistentVolumeClaims: []
@@ -157,7 +157,6 @@ enableServiceLinks: true
 ###########
 # Ingress #
 ###########
-
 # Deploys a Kubernetes Ingress resource, defaults to nginx ingress controller.
 # If networking.k8s.io/v1 is available in your cluster that will be used,
 # otherwise fall back to networking.k8s.io/v1

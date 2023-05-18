@@ -88,15 +88,7 @@ spec:
         {{- end }}
         {{- end }}
 
-      {{- if or .volumes (and $.Values.volumes (ne (lower (printf "%s" .excludeGlobalExtraAnnotations)) "true")) }}
-      volumes:
-      {{- if and $.Values.volumes (ne (lower (printf "%s" .excludeGlobalExtraAnnotations)) "true") }}
-      {{- toYaml $.Values.volumes | nindent 6 }}
-      {{- end }}
-      {{- if .volumes }}
-      {{- toYaml .volumes | nindent 6 }}
-      {{- end }}
-      {{- end }}
+      {{- include "chart.buildVolumes" (dict "volumes" .volumes "excludeGlobalVolumes" .excludeGlobalVolumes "values" $.Values) | indent 6 }}
   backoffLimit: 0
 
 {{- end }}

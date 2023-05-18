@@ -73,10 +73,27 @@ Will include the global annotations unless specified
 Will include the resource-specific annotations
 */}}
 {{- define "chart.buildExtraAnnotations" -}}
-{{- if and .values.extraAnnotations (ne (lower (printf "%s" .excludeGlobalExtraAnnotations)) "true") }}
+{{- if and .values.extraAnnotations (ne (.excludeGlobalExtraAnnotations | toString | lower) "true") }}
 {{- toYaml .values.extraAnnotations | nindent 0 }}
 {{- end }}
 {{- if .extraAnnotations }}
 {{- toYaml .extraAnnotations  | nindent 0 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Generic function to build volumes
+Will include the global volumes unless specified
+Will include the resource-specific volumes
+*/}}
+{{- define "chart.buildVolumes" -}}
+{{- if  or .volumes (and .values.volumes (ne (.excludeGlobalVolumes | toString | lower) "true")) }}
+volumes:
+{{- if and .values.volumes (ne (.excludeGlobalVolumes | toString | lower) "true") }}
+{{- toYaml .values.volumes | nindent 2 }}
+{{- end }}
+{{- if .volumes }}
+{{- toYaml .volumes | nindent 2 }}
+{{- end }}
 {{- end }}
 {{- end }}
