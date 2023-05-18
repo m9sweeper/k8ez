@@ -102,6 +102,7 @@ configData: {}
 
 # Set secret data key-value pairs that will be loaded into env variables
 secretData: {}
+#  K8ezSecret: 'YES'
 
 # List of files to load into configmaps.  Supports glob patterns, all files that match will be put into the configmap
 configFiles: []
@@ -134,11 +135,11 @@ volumeMounts: []
   #   mountPath: /mount
 
 # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-persistentVolumeClaims:
-  # - name: efs
-  #   accessMode: ReadWriteMany
-  #   storageClass: my-storage-class
-  #   size: 50Gi
+persistentVolumeClaims: []
+#   - name: efs
+#     accessMode: ReadWriteMany
+#     storageClass: my-storage-class
+#     size: 50Gi
 
 # Possibly select a certain type of node
 nodeSelector: {}
@@ -200,17 +201,28 @@ istio:
 statefulSets:
   enabled: false
   statefulsets: []
-    # - name: abcd
-    #   image: nginx
-    #   port: 4000
-    #   serviceType: "ClusterIP"
-    #   replicaCount: 1
-    #   command: "sh"
-    #   args: []
-    #   volumes: []
-    #   volumeMounts: []
-    #   env: {} # additional env vars
-    #   securityContext: {}
+#    - name: nginx
+#      replicaCount: 1
+#      excludeGlobalExtraAnnotations: true  # false if unset
+#      extraAnnotations:
+#        testing: 1234
+#      image:
+#        registry: nginx
+#        tag: latest
+#        pullPolicy: always
+#      port: 4000
+#      targetPort: 8080
+#      serviceType: "ClusterIP"
+#      command: "sh"
+#      args: ["test", "me"]
+#      excludeGlobalVolumes: true  # false if unset
+#      volumes: []
+#      volumeMounts: []
+#      resources: {}  # will default to global resources
+#      env: # additional env vars
+#        ENV_VAR_1: "my env var"
+#      securityContext:
+#        testing: 5678
 
 #############################################################
 # Additional Deployments                                    #
@@ -220,31 +232,31 @@ extraDeployment:
   hpaExtra: # autoscaling
     enabled: false
   deployments: []
-#     - name: nginx
-#       replicaCount: 1
-#       excludeGlobalExtraAnnotations: true  # false if unset
-#       extraAnnotations:
-#         testing: 1234
-#       image:
-#         registry: nginx
-#         tag: latest
-#         pullPolicy: always
-#       port: 4000
-#       targetPort: 8080
-#       serviceType: "ClusterIP"
-#       command: "sh"
-#       args: ["test", "me"]
-#       excludeGlobalVolumes: true  # false if unset
-#       volumes: []
-#       volumeMounts: []
-#       resources: {}  # will default to global resources
-#       env: # additional env vars
+#    - name: nginx-TEST
+#      replicaCount: 1
+#      excludeGlobalExtraAnnotations: true  # false if unset
+#      extraAnnotations:
+#        testing: 1234
+#      image:
+#        registry: nginx
+#        tag: latest
+#        pullPolicy: always
+#      port: 4000
+#      targetPort: 8080
+#      serviceType: "ClusterIP"
+#      command: "sh"
+#      args: ["test", "me"]
+#      excludeGlobalVolumes: true  # false if unset
+#      volumes: []
+#      volumeMounts: []
+#      resources: {}  # will default to global resources
+#      env: # additional env vars
 #        ENV_VAR_1: "my env var"
-#       securityContext:
-#         testing: 5678
-#       minPods: 2
-#       maxPods: 4
-#       cpuAverageUtilizationThreshold: 70
+#      securityContext:
+#        testing: 5678
+#      minPods: 2
+#      maxPods: 4
+#      cpuAverageUtilizationThreshold: 70
 
 
 ############
@@ -271,9 +283,9 @@ cronJobs:
 # Jobs #
 ########
 jobs:
-  enabled: true
-  jobs:
-    - name: nginx
+  enabled: false
+  jobs: []
+#    - name: nginx
 #      excludeGlobalExtraAnnotations: true  # false if unset
 #      extraAnnotations:
 #        testing: 1234

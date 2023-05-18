@@ -12,7 +12,7 @@ metadata:
   labels:
     {{- range $k, $v := $dictOfBasicLabels }}
     {{- if eq $k "app" }}
-    {{ $k }}: {{ $v | trunc 40 }}-{{ $deploymentName }}
+    {{ $k }}: {{ $deploymentFullName }}
     {{- else}}
     {{ $k }}: {{ $v }}
     {{- end }}
@@ -23,7 +23,7 @@ spec:
     matchLabels:
       {{- range $k, $v := $dictOfBasicSelectorLabels }}
       {{- if eq $k "app" }}
-      {{ $k }}: {{ $v | trunc 40 }}-{{ $deploymentName }}
+      {{ $k }}: {{ $deploymentFullName }}
       {{- else}}
       {{ $k }}: {{ $v }}
       {{- end }}
@@ -45,7 +45,7 @@ spec:
       labels:
         {{- range $k, $v := $dictOfBasicLabels }}
         {{- if eq $k "app" }}
-        {{ $k }}: {{ $v | trunc 40 }}-{{ $deploymentName }}
+        {{ $k }}: {{ $deploymentFullName }}
         {{- else}}
         {{ $k }}: {{ $v }}
         {{- end }}
@@ -71,7 +71,7 @@ spec:
                     operator: In
                     values:
                       {{- if eq $k "app" }}
-                      - {{ printf "%s-%s" ($v | trunc 40) $deploymentName | quote }}
+                      - {{ $deploymentFullName | quote }}
                       {{- else }}
                       - {{ $v | quote }}
                   {{- end }}
@@ -175,7 +175,8 @@ spec:
 
 {{- if .Values.extraDeployment.hpaExtra.enabled -}}
 {{- range .Values.extraDeployment.deployments }}
-{{- $deploymentFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) .name }}
+{{- $deploymentName := (required "Each entry in extraDeployment.deployments needs a name" .name) }}
+{{- $deploymentFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) $deploymentName }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -201,25 +202,36 @@ spec:
 
 {{- if .Values.extraDeployment.enabled -}}
 {{- range .Values.extraDeployment.deployments }}
+{{- $deploymentName := (required "Each entry in extraDeployment.deployments needs a name" .name) }}
+{{- $dictOfBasicLabels := include "chart.basicLabels" $ | fromYaml }}
+{{- $dictOfBasicSelectorLabels := include "chart.basicSelectorLabels" $ | fromYaml }}
+{{- $deploymentFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) $deploymentName }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .name }}
+  name: {{ $deploymentFullName }}
   labels:
-    app: {{ .name }}
-    chart: {{ include "chart.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
-    version: {{ $.Chart.Version }}
+    {{- range $k, $v := $dictOfBasicLabels }}
+    {{- if eq $k "app" }}
+    {{ $k }}: {{ $deploymentFullName }}
+    {{- else}}
+    {{ $k }}: {{ $v }}
+    {{- end }}
+    {{- end }}
 spec:
-  type: {{ .serviceType }}
+  type: {{ default "ClusterIP" .serviceType }}
   ports:
     - port: {{ .port }}
       targetPort: {{ or .targetPort .port }}
       name: http
   selector:
-    app: {{ .name }}
-    release: {{ $.Release.Name }}
+      {{- range $k, $v := $dictOfBasicSelectorLabels }}
+      {{- if eq $k "app" }}
+      {{ $k }}: {{ $deploymentFullName }}
+      {{- else}}
+      {{ $k }}: {{ $v }}
+      {{- end }}
+      {{- end }}
 {{- end }}
 {{- end }}

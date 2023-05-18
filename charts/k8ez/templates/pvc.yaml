@@ -1,22 +1,20 @@
 {{ if .Values.persistentVolumeClaims }}
 {{- range .Values.persistentVolumeClaims }}
+{{- $pvcName := (required "Each entry in persistentVolumeClaims needs a name" .name) }}
+{{- $pvcFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) $pvcName }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .name }}
+  name: {{ $pvcFullName }}
   labels:
-    app: {{ include "chart.name" $ }}
-    chart: {{ include "chart.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
-    version: {{ $.Chart.Version }}
+    {{- include "chart.basicLabels" $ | nindent 4 }}
 spec:
   accessModes:
-  - {{ .accessMode }}
-  storageClassName: {{ .storageClass }}
+  - {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClass, and a size" .accessMode }}
+  storageClassName: {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClass, and a size" .storageClass }}
   resources:
     requests:
-      storage: {{ .size }}
+      storage: {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClass, and a size" .size }}
 {{- end }}
 {{- end }}
