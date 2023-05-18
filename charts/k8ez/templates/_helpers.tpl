@@ -67,6 +67,11 @@ IF $.Values.image isn't defined, throw errors
 {{- $image_registry }}:{{ $image_tag }}
 {{- end }}
 
+{{/*
+Generic function to build extra annotations
+Will include the global annotations unless specified
+Will include the resource-specific annotations
+*/}}
 {{- define "chart.buildExtraAnnotations" -}}
 {{- if and .values.extraAnnotations (ne .excludeGlobalExtraAnnotations true) }}
 {{- toYaml .values.extraAnnotations | nindent 0 }}
