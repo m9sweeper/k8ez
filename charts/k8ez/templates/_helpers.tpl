@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "chart.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" | lower -}}
 {{- end -}}
 
 {{/*
@@ -13,7 +13,7 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "chart.fullname" -}}
   {{- if .Values.fullNameOverride -}}
-    {{- .Values.fullNameOverride | trunc 63 | trimSuffix "-" -}}
+    {{- .Values.fullNameOverride | trunc 63 | trimSuffix "-" | lower -}}
   {{- else -}}
     {{- $name := include "chart.name" . -}}
     {{- if contains $name .Release.Name -}}
