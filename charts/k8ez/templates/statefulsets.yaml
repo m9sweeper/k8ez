@@ -37,12 +37,7 @@ spec:
         {{- if not $.Values.istio.enabled }}
         sidecar.istio.io/inject: "false"
         {{- end }}
-        {{- if and $.Values.extraAnnotations (ne .excludeGlobalExtraAnnotations true) }}
-        {{- toYaml $.Values.extraAnnotations | nindent 8 }}
-        {{- end }}
-        {{- if .extraAnnotations }}
-        {{- toYaml .extraAnnotations | nindent 8 }}
-        {{- end }}
+        {{- include "chart.buildExtraAnnotations" (dict "excludeGlobalExtraAnnotations" .excludeGlobalExtraAnnotations "extraAnnotations" .extraAnnotations "values" $.Values) | indent 8 }}
       labels:
         {{- range $k, $v := $dictOfBasicLabels }}
         {{- if eq $k "app" }}
