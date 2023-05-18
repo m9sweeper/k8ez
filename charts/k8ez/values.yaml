@@ -270,16 +270,25 @@ cronJobs:
 ########
 # Jobs #
 ########
-
 jobs:
-  enabled: false
-  jobs: []
-    # - name: hgu
-    #   image: nginx
-    #   command: "sh"
-    #   #args: []
-    #   #volumes: []
-    #   #volumeMounts: []
-    #   #env: {} # additional env vars
-    #   #extraAnnotations: {} # additional annotations
-    #   securityContext: {}
+  enabled: true
+  jobs:
+    - name: nginx
+#      excludeGlobalExtraAnnotations: true  # false if unset
+#      extraAnnotations:
+#        testing: 1234
+#      image:
+#        registry: nginx
+#        tag: latest
+#        pullPolicy: always
+#      securityContext:
+#        testing: 5678
+#      restartPolicy: ""  # will default to "Never"
+#      command: "sh"
+#      args: ["test", "me"]
+#      env: # additional env vars
+#       ENV_VAR_1: "my env var"
+#      resources: {}  # will default to global resources
+#      excludeGlobalVolumes: true  # false if unset
+#      volumes: []
+#      volumeMounts: []

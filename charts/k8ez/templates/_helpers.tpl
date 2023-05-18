@@ -66,3 +66,12 @@ IF $.Values.image isn't defined, throw errors
 {{- $image_tag := default .values.image.tag $image_path.tag }}
 {{- $image_registry }}:{{ $image_tag }}
 {{- end }}
+
+{{- define "chart.buildExtraAnnotations" -}}
+{{- if and .values.extraAnnotations (ne .excludeGlobalExtraAnnotations true) }}
+{{- toYaml .values.extraAnnotations | nindent 0 }}
+{{- end }}
+{{- if .extraAnnotations }}
+{{- toYaml .extraAnnotations  | nindent 0 }}
+{{- end }}
+{{- end }}
