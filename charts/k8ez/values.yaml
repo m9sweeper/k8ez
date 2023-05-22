@@ -77,7 +77,6 @@ service:
 # Configure resources it will be given with reasonable defaults
 resources:
   limits:
-    cpu: 1000m
     memory: 512Mi
   requests:
     cpu: 200m
