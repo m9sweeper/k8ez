@@ -16,16 +16,39 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   http:
+  {{- if .Values.istio.forceHttpRedirect }}
   - match:
-    {{- range .Values.istio.paths }}
-    - uri:
-       prefix: {{ . }}
-    {{- end }}
+      - headers:
+          'X-Forwarded-Proto':
+            exact: http
+    redirect:
+      scheme: https
+      redirectCode: 301
+  - match:
+  {{- range .Values.istio.paths }}
+      - uri:
+          prefix: {{ . }}
+        headers:
+          'X-Forwarded-Proto':
+            exact: https
+  {{- end }}
     route:
-    - destination:
-        host: {{ include "chart.fullname" . }}
-        port:
-          number: {{ .Values.service.port }}
+      - destination:
+          host: {{ include "chart.fullname" . }}
+          port:
+            number: {{ .Values.service.port }}
+  {{- else }}
+  - match:
+  {{- range .Values.istio.paths }}
+      - uri:
+          prefix: {{ . }}
+  {{- end }}
+    route:
+      - destination:
+          host: {{ include "chart.fullname" . }}
+          port:
+            number: {{ .Values.service.port }}
+  {{- end }}
 
 
 ---
