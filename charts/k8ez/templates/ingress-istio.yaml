@@ -17,9 +17,19 @@ spec:
   {{- end }}
   http:
   - match:
+    - headers:
+        'X-Forwarded-Proto':
+          exact: http
+    redirect:
+      scheme: https
+      redirectCode: 301
+  - match:
     {{- range .Values.istio.paths }}
     - uri:
-       prefix: {{ . }}
+        prefix: {{ . }}
+      headers:
+        'X-Forwarded-Proto':
+          exact: https
     {{- end }}
     route:
     - destination:
