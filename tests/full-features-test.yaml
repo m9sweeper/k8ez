@@ -3,9 +3,9 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: test-everything-app-k8ez
+  name: k8singress-fullnameoverride
   labels:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -14,16 +14,16 @@ spec:
   minAvailable: 50%
   selector:
     matchLabels:
-      app: test-everything-app-k8ez
+      app: k8singress-fullnameoverride
       release: test-everything-app
 ---
 # Source: k8ez/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: test-everything-app-k8ez
+  name: k8singress-fullnameoverride
   labels:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -33,9 +33,9 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: test-everything-app-k8ez
+  name: k8singress-fullnameoverride
   labels:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -44,13 +44,29 @@ type: Opaque
 data:
   SECRET: dmFsdWU=
 ---
+# Source: k8ez/templates/configmap-files.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: all-yaml
+  labels:
+    app: k8singress-fullnameoverride
+    release: test-everything-app
+    chart: k8ez-1.0.0
+    heritage: Helm
+    version: 1.0.0
+data:
+  example-file.yaml: |-
+    example-root:
+      example-key: exampleValue
+---
 # Source: k8ez/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: test-everything-app-k8ez
+  name: k8singress-fullnameoverride
   labels:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -58,13 +74,32 @@ metadata:
 data:
   K8EZ: "YES"
 ---
+# Source: k8ez/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: k8singress-fullnameoverride-myvolumeclaim
+  labels:
+    app: k8singress-fullnameoverride
+    release: test-everything-app
+    chart: k8ez-1.0.0
+    heritage: Helm
+    version: 1.0.0
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: default
+  resources:
+    requests:
+      storage: 50Gi
+---
 # Source: k8ez/templates/extra-deployments.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-abcde
+  name: k8singress-fullnameoverride-extra-redis-deployment-one
   labels:
-    app: test-everything-app-k8ez-abcde
+    app: k8singress-fullnameoverride-extra-redis-deployment-one
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -76,16 +111,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-      app: test-everything-app-k8ez-abcde
+      app: k8singress-fullnameoverride-extra-redis-deployment-one
       release: test-everything-app
 ---
 # Source: k8ez/templates/extra-deployments.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-abcdf
+  name: k8singress-fullnameoverride-extra-redis-deployment-two
   labels:
-    app: test-everything-app-k8ez-abcdf
+    app: k8singress-fullnameoverride-extra-redis-deployment-two
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -97,16 +132,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-      app: test-everything-app-k8ez-abcdf
+      app: k8singress-fullnameoverride-extra-redis-deployment-two
       release: test-everything-app
 ---
 # Source: k8ez/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez
+  name: k8singress-fullnameoverride
   labels:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -118,16 +153,16 @@ spec:
       targetPort: 80
       name: http
   selector:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithImageString
+  name: k8singress-fullnameoverride-statefulSetWithImageString
   labels:
-    app: test-everything-app-k8ez-statefulSetWithImageString
+    app: k8singress-fullnameoverride-statefulSetWithImageString
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -139,16 +174,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-    app: test-everything-app-k8ez-statefulSetWithImageString
+    app: k8singress-fullnameoverride-statefulSetWithImageString
     release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithImageDict
+  name: k8singress-fullnameoverride-statefulSetWithImageDict
   labels:
-    app: test-everything-app-k8ez-statefulSetWithImageDict
+    app: k8singress-fullnameoverride-statefulSetWithImageDict
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -160,16 +195,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-    app: test-everything-app-k8ez-statefulSetWithImageDict
+    app: k8singress-fullnameoverride-statefulSetWithImageDict
     release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithImageOnly
+  name: k8singress-fullnameoverride-statefulSetWithImageOnly
   labels:
-    app: test-everything-app-k8ez-statefulSetWithImageOnly
+    app: k8singress-fullnameoverride-statefulSetWithImageOnly
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -181,16 +216,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-    app: test-everything-app-k8ez-statefulSetWithImageOnly
+    app: k8singress-fullnameoverride-statefulSetWithImageOnly
     release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithTagOnly
+  name: k8singress-fullnameoverride-statefulSetWithTagOnly
   labels:
-    app: test-everything-app-k8ez-statefulSetWithTagOnly
+    app: k8singress-fullnameoverride-statefulSetWithTagOnly
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -202,16 +237,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-    app: test-everything-app-k8ez-statefulSetWithTagOnly
+    app: k8singress-fullnameoverride-statefulSetWithTagOnly
     release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithEmptyImage
+  name: k8singress-fullnameoverride-statefulSetWithEmptyImage
   labels:
-    app: test-everything-app-k8ez-statefulSetWithEmptyImage
+    app: k8singress-fullnameoverride-statefulSetWithEmptyImage
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -223,16 +258,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-    app: test-everything-app-k8ez-statefulSetWithEmptyImage
+    app: k8singress-fullnameoverride-statefulSetWithEmptyImage
     release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithoutImageInfo
+  name: k8singress-fullnameoverride-statefulSetWithoutImageInfo
   labels:
-    app: test-everything-app-k8ez-statefulSetWithoutImageInfo
+    app: k8singress-fullnameoverride-statefulSetWithoutImageInfo
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -244,16 +279,16 @@ spec:
       targetPort: 4000
       name: http
   selector:
-    app: test-everything-app-k8ez-statefulSetWithoutImageInfo
+    app: k8singress-fullnameoverride-statefulSetWithoutImageInfo
     release: test-everything-app
 ---
 # Source: k8ez/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-everything-app-k8ez
+  name: k8singress-fullnameoverride
   labels:
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -262,22 +297,23 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: test-everything-app-k8ez
+      app: k8singress-fullnameoverride
       release: test-everything-app
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"
+        someExtraAnnotation: annotationValueHere
       labels:
-        app: test-everything-app-k8ez
+        app: k8singress-fullnameoverride
         release: test-everything-app
         chart: k8ez-1.0.0
         heritage: Helm
         version: 1.0.0
     spec:
-      serviceAccount: test-everything-app-k8ez
+      serviceAccount: k8singress-fullnameoverride
       enableServiceLinks: true
       securityContext:
         fsGroup: 1050
@@ -291,15 +327,15 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez"
+                    - "k8singress-fullnameoverride"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez"
-          image: redis
+        - name: "k8singress-fullnameoverride"
+          image: redis:7.2.1
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -319,15 +355,14 @@ spec:
           - sleep 1000
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           volumeMounts:
             - mountPath: /mount
               name: mydir
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -342,9 +377,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-everything-app-k8ez-abcde
+  name: k8singress-fullnameoverride-extra-redis-deployment-one
   labels:
-    app: test-everything-app-k8ez-abcde
+    app: k8singress-fullnameoverride-extra-redis-deployment-one
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -353,22 +388,23 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-abcde
+      app: k8singress-fullnameoverride-extra-redis-deployment-one
       release: test-everything-app
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        someExtraAnnotation: annotationValueHere
       labels:
-        app: test-everything-app-k8ez-abcde
+        app: k8singress-fullnameoverride-extra-redis-deployment-one
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
         version: 1.0.0
     spec:
-      serviceAccount: test-everything-app-k8ez
+      serviceAccount: k8singress-fullnameoverride
       enableServiceLinks: true
       securityContext:
         fsGroup: 1050
@@ -382,14 +418,14 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                      - "test-everything-app-k8ez-abcde"
+                      - "k8singress-fullnameoverride-extra-redis-deployment-one"
                   - key: "release"
                     operator: In
                     values:
                       - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-abcde"
+        - name: "k8singress-fullnameoverride-extra-redis-deployment-one"
           image: "redis"
           imagePullPolicy: Always
           securityContext:
@@ -414,15 +450,14 @@ spec:
             value: "value"
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           volumeMounts:
             - mountPath: /mount
               name: mydir
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -441,9 +476,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-everything-app-k8ez-abcdf
+  name: k8singress-fullnameoverride-extra-redis-deployment-two
   labels:
-    app: test-everything-app-k8ez-abcdf
+    app: k8singress-fullnameoverride-extra-redis-deployment-two
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -452,22 +487,23 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-abcdf
+      app: k8singress-fullnameoverride-extra-redis-deployment-two
       release: test-everything-app
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        someExtraAnnotation: annotationValueHere
       labels:
-        app: test-everything-app-k8ez-abcdf
+        app: k8singress-fullnameoverride-extra-redis-deployment-two
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
         version: 1.0.0
     spec:
-      serviceAccount: test-everything-app-k8ez
+      serviceAccount: k8singress-fullnameoverride
       enableServiceLinks: true
       securityContext:
         fsGroup: 1050
@@ -481,14 +517,14 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                      - "test-everything-app-k8ez-abcdf"
+                      - "k8singress-fullnameoverride-extra-redis-deployment-two"
                   - key: "release"
                     operator: In
                     values:
                       - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-abcdf"
+        - name: "k8singress-fullnameoverride-extra-redis-deployment-two"
           image: "redis"
           imagePullPolicy: Always
           securityContext:
@@ -513,15 +549,14 @@ spec:
             value: "value"
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           volumeMounts:
             - mountPath: /mount
               name: mydir
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -540,9 +575,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithImageString
+  name: k8singress-fullnameoverride-statefulSetWithImageString
   labels:
-    app: test-everything-app-k8ez-statefulSetWithImageString
+    app: k8singress-fullnameoverride-statefulSetWithImageString
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -551,17 +586,21 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-statefulSetWithImageString
+      app: k8singress-fullnameoverride-statefulSetWithImageString
       release: test-everything-app
-  serviceName: test-everything-app-k8ez-statefulSetWithImageString
+  serviceName: k8singress-fullnameoverride-statefulSetWithImageString
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        annotationInfo: exclude global, include extras
+        imageType: image string
+        resources: custom limits (limits.memory 256Mi, requests.cpu 200m, requests.memory
+          128Mi)
       labels:
-        app: test-everything-app-k8ez-statefulSetWithImageString
+        app: k8singress-fullnameoverride-statefulSetWithImageString
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
@@ -581,14 +620,14 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez-statefulSetWithImageString"
+                    - "k8singress-fullnameoverride-statefulSetWithImageString"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-statefulSetWithImageString"
+        - name: "k8singress-fullnameoverride-statefulSetWithImageString"
           image: "myImageOne"
           imagePullPolicy: Always
           securityContext:
@@ -613,19 +652,15 @@ spec:
             value: "value"
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           volumeMounts:
             - mountPath: /mount
               name: mydir
           resources:
             limits:
-              cpu: 1000m
-              memory: 512Mi
-            requests:
-              cpu: 200m
-              memory: 128Mi      
+              memory: 256Mi      
       volumes:
         - hostPath:
             path: /var/local/aaa
@@ -640,9 +675,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithImageDict
+  name: k8singress-fullnameoverride-statefulSetWithImageDict
   labels:
-    app: test-everything-app-k8ez-statefulSetWithImageDict
+    app: k8singress-fullnameoverride-statefulSetWithImageDict
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -651,17 +686,20 @@ spec:
   replicas: 
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-statefulSetWithImageDict
+      app: k8singress-fullnameoverride-statefulSetWithImageDict
       release: test-everything-app
-  serviceName: test-everything-app-k8ez-statefulSetWithImageDict
+  serviceName: k8singress-fullnameoverride-statefulSetWithImageDict
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        someExtraAnnotation: annotationValueHere
+        annotationInfo: include global and extras
+        imageType: full dictionary
       labels:
-        app: test-everything-app-k8ez-statefulSetWithImageDict
+        app: k8singress-fullnameoverride-statefulSetWithImageDict
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
@@ -681,14 +719,14 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez-statefulSetWithImageDict"
+                    - "k8singress-fullnameoverride-statefulSetWithImageDict"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-statefulSetWithImageDict"
+        - name: "k8singress-fullnameoverride-statefulSetWithImageDict"
           image: "myImageTwo:myTagTwo"
           
           imagePullPolicy: 
@@ -707,12 +745,11 @@ spec:
             - containerPort: 4000
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -727,9 +764,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithImageOnly
+  name: k8singress-fullnameoverride-statefulSetWithImageOnly
   labels:
-    app: test-everything-app-k8ez-statefulSetWithImageOnly
+    app: k8singress-fullnameoverride-statefulSetWithImageOnly
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -738,17 +775,20 @@ spec:
   replicas: 
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-statefulSetWithImageOnly
+      app: k8singress-fullnameoverride-statefulSetWithImageOnly
       release: test-everything-app
-  serviceName: test-everything-app-k8ez-statefulSetWithImageOnly
+  serviceName: k8singress-fullnameoverride-statefulSetWithImageOnly
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        someExtraAnnotation: annotationValueHere
+        annotationInfo: include global and extras
+        imageType: dictionary with image only
       labels:
-        app: test-everything-app-k8ez-statefulSetWithImageOnly
+        app: k8singress-fullnameoverride-statefulSetWithImageOnly
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
@@ -768,14 +808,14 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez-statefulSetWithImageOnly"
+                    - "k8singress-fullnameoverride-statefulSetWithImageOnly"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-statefulSetWithImageOnly"
+        - name: "k8singress-fullnameoverride-statefulSetWithImageOnly"
           image: "separateImageOnly"
           
           imagePullPolicy: 
@@ -794,12 +834,11 @@ spec:
             - containerPort: 4000
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -814,9 +853,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithTagOnly
+  name: k8singress-fullnameoverride-statefulSetWithTagOnly
   labels:
-    app: test-everything-app-k8ez-statefulSetWithTagOnly
+    app: k8singress-fullnameoverride-statefulSetWithTagOnly
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -825,17 +864,20 @@ spec:
   replicas: 
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-statefulSetWithTagOnly
+      app: k8singress-fullnameoverride-statefulSetWithTagOnly
       release: test-everything-app
-  serviceName: test-everything-app-k8ez-statefulSetWithTagOnly
+  serviceName: k8singress-fullnameoverride-statefulSetWithTagOnly
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        someExtraAnnotation: annotationValueHere
+        annotationInfo: include global and extras
+        imageType: dictionary with tag only (should use default image with custom tag)
       labels:
-        app: test-everything-app-k8ez-statefulSetWithTagOnly
+        app: k8singress-fullnameoverride-statefulSetWithTagOnly
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
@@ -855,14 +897,14 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez-statefulSetWithTagOnly"
+                    - "k8singress-fullnameoverride-statefulSetWithTagOnly"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-statefulSetWithTagOnly"
+        - name: "k8singress-fullnameoverride-statefulSetWithTagOnly"
           image: "redis:separateTagOnly"
           
           imagePullPolicy: 
@@ -881,12 +923,11 @@ spec:
             - containerPort: 4000
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -901,9 +942,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithEmptyImage
+  name: k8singress-fullnameoverride-statefulSetWithEmptyImage
   labels:
-    app: test-everything-app-k8ez-statefulSetWithEmptyImage
+    app: k8singress-fullnameoverride-statefulSetWithEmptyImage
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -912,17 +953,19 @@ spec:
   replicas: 
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-statefulSetWithEmptyImage
+      app: k8singress-fullnameoverride-statefulSetWithEmptyImage
       release: test-everything-app
-  serviceName: test-everything-app-k8ez-statefulSetWithEmptyImage
+  serviceName: k8singress-fullnameoverride-statefulSetWithEmptyImage
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        annotationInfo: exclude global, include extras
+        imageType: empty dictionary (should use default)
       labels:
-        app: test-everything-app-k8ez-statefulSetWithEmptyImage
+        app: k8singress-fullnameoverride-statefulSetWithEmptyImage
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
@@ -942,15 +985,15 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez-statefulSetWithEmptyImage"
+                    - "k8singress-fullnameoverride-statefulSetWithEmptyImage"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-statefulSetWithEmptyImage"
-          image: "redis"
+        - name: "k8singress-fullnameoverride-statefulSetWithEmptyImage"
+          image: "redis:7.2.1"
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -967,12 +1010,11 @@ spec:
             - containerPort: 4000
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -987,9 +1029,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: test-everything-app-k8ez-statefulSetWithoutImageInfo
+  name: k8singress-fullnameoverride-statefulSetWithoutImageInfo
   labels:
-    app: test-everything-app-k8ez-statefulSetWithoutImageInfo
+    app: k8singress-fullnameoverride-statefulSetWithoutImageInfo
     chart: k8ez-1.0.0
     heritage: Helm
     release: test-everything-app
@@ -998,17 +1040,19 @@ spec:
   replicas: 
   selector:
     matchLabels:
-      app: test-everything-app-k8ez-statefulSetWithoutImageInfo
+      app: k8singress-fullnameoverride-statefulSetWithoutImageInfo
       release: test-everything-app
-  serviceName: test-everything-app-k8ez-statefulSetWithoutImageInfo
+  serviceName: k8singress-fullnameoverride-statefulSetWithoutImageInfo
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
+        annotationInfo: exclude global, include extras
+        imageType: none included (should use default)
       labels:
-        app: test-everything-app-k8ez-statefulSetWithoutImageInfo
+        app: k8singress-fullnameoverride-statefulSetWithoutImageInfo
         chart: k8ez-1.0.0
         heritage: Helm
         release: test-everything-app
@@ -1028,15 +1072,15 @@ spec:
                   - key: "app"
                     operator: In
                     values:
-                    - "test-everything-app-k8ez-statefulSetWithoutImageInfo"
+                    - "k8singress-fullnameoverride-statefulSetWithoutImageInfo"
                   - key: "release"
                     operator: In
                     values:
                     - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-everything-app-k8ez-statefulSetWithoutImageInfo"
-          image: "redis"
+        - name: "k8singress-fullnameoverride-statefulSetWithoutImageInfo"
+          image: "redis:7.2.1"
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -1053,12 +1097,11 @@ spec:
             - containerPort: 4000
           envFrom:
           - configMapRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           - secretRef:
-              name: test-everything-app-k8ez
+              name: k8singress-fullnameoverride
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
@@ -1073,27 +1116,29 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: test-everything-app-k8ez-job-hgu
+  name: k8singress-fullnameoverride-job-example-job
   annotations:
-    checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-    checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956    
-    annotation: value
+    checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+    checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f    
+    someExtraAnnotation: annotationValueHere
+    jobExtraAnnotation: something
 spec:
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8ez-configmap: ed42f31cdbc81bf9832a61627a56995df96e8cee20c1643b8d282a016025b6d4
-        checksum/test-everything-app-k8ez-secret: 8668621bd9b6e0b3b628c55f5dcc4b7d940c672019dc93f1c8e9573b8c30a956
+        checksum/k8singress-fullnameoverride-configmap: 6ade89a46e7fbe48e2828ad8fe9e90e7a72af7e0da980c81169df24c0d915ec6
+        checksum/k8singress-fullnameoverride-secret: ea61b7d8f0cbf1a9c224399eeef93baea74ae19a91a8ad238ecdff4c4707367f
         sidecar.istio.io/inject: "false"        
-        annotation: value
+        someExtraAnnotation: annotationValueHere
+        jobExtraAnnotation: something
     spec:
-      serviceAccount: test-everything-app-k8ez
+      serviceAccount: k8singress-fullnameoverride
       enableServiceLinks: true
       securityContext:
         fsGroup: 1050
       restartPolicy: Never
       containers:
-      - name: "test-everything-app-k8ez-job-hgu"
+      - name: "k8singress-fullnameoverride-job-example-job"
         image: "redis"
         imagePullPolicy: Always
         securityContext:
@@ -1116,15 +1161,14 @@ spec:
           value: "value"
         envFrom:
         - configMapRef:
-            name: test-everything-app-k8ez
+            name: k8singress-fullnameoverride
         - secretRef:
-            name: test-everything-app-k8ez
+            name: k8singress-fullnameoverride
         volumeMounts:
           - mountPath: /mount
             name: mydir
         resources:
           limits:
-            cpu: 1000m
             memory: 512Mi
           requests:
             cpu: 200m
@@ -1144,9 +1188,9 @@ spec:
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: test-everything-app-k8ez-abc
+  name: k8singress-fullnameoverride-example-cronjob
   labels:  
-    app: test-everything-app-k8ez
+    app: k8singress-fullnameoverride
     release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
@@ -1159,13 +1203,14 @@ spec:
         metadata:
           annotations:
             sidecar.istio.io/inject: "false"
+            someExtraAnnotation: annotationValueHere
         spec:
-          serviceAccount: test-everything-app-k8ez
+          serviceAccount: k8singress-fullnameoverride
           enableServiceLinks: true
           securityContext:
             fsGroup: 1050
           containers:
-            - name: abc
+            - name: example-cronjob
               image: "redis"
               imagePullPolicy: Always
               securityContext:
@@ -1188,15 +1233,14 @@ spec:
                 value: "value"
               envFrom:
               - configMapRef:
-                  name: test-everything-app-k8ez
+                  name: k8singress-fullnameoverride
               - secretRef:
-                  name: test-everything-app-k8ez
+                  name: k8singress-fullnameoverride
               volumeMounts:
               - mountPath: /mount
                 name: mydir
               resources:
                 limits:
-                  cpu: 1000m
                   memory: 512Mi
                 requests:
                   cpu: 200m
@@ -1210,3 +1254,26 @@ spec:
             name: mydir
 
   schedule: "30 * * * *"
+---
+# Source: k8ez/templates/ingress-kubernetes.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: k8singress-fullnameoverride
+  labels:
+    app: k8singress-fullnameoverride
+    release: test-everything-app
+    chart: k8ez-1.0.0
+    heritage: Helm
+    version: 1.0.0
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: example.local
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: k8singress-fullnameoverride
+            servicePort: 80

@@ -7,7 +7,7 @@ fullnameOverride: ""
 
 # Image and any required credentials to download it for the default deployment
 image:
-  registry: ""
+  image: ""
   tag: ""
   pullPolicy: Always
   credentials:
@@ -48,7 +48,7 @@ deployment:
     containers: []
 #      - name: migrations
 #        image:
-#          registry: "path/to/registry"
+#          image: "path/to/image"
 #          tag: "my-tag"
 #          pullPolicy: always
 #        command: 'python'
@@ -103,10 +103,15 @@ configData: {}
 secretData: {}
 #  K8ezSecret: 'YES'
 
-# List of files to load into configmaps.  Supports glob patterns, all files that match will be put into the configmap
+# List of files to load into configmaps.
+# Supports glob patterns, all files that match will be put into the configmap
+# note that the path to the file(s) should be from within the k8ez chart
+# (ie: files/config.toml refers to charts/k8ez/files/config.toml)
 configFiles: []
-#   - fileGlob: files/config.toml
-#     configMapName: config.toml
+#  - configMapName: all-toml
+#    fileGlob: "files/**.toml"
+#  - fileGlob: files/config.toml
+#    configMapName: config.toml
 
 # List of extra annotations to be injected into pod templates
 extraAnnotations: {}
@@ -137,7 +142,7 @@ volumeMounts: []
 persistentVolumeClaims: []
 #   - name: efs
 #     accessMode: ReadWriteMany
-#     storageClass: my-storage-class
+#     storageClassName: my-storage-class
 #     size: 50Gi
 
 # Possibly select a certain type of node
@@ -206,7 +211,7 @@ statefulSets:
 #      extraAnnotations:
 #        testing: 1234
 #      image:
-#        registry: nginx
+#        image: nginx
 #        tag: latest
 #        pullPolicy: always
 #      port: 4000
@@ -237,7 +242,7 @@ extraDeployment:
 #      extraAnnotations:
 #        testing: 1234
 #      image:
-#        registry: nginx
+#        image: nginx
 #        tag: latest
 #        pullPolicy: always
 #      port: 4000
@@ -266,7 +271,7 @@ cronJobs:
   scheduled: []
 #    - name: abc
 #      image:
-#        registry: nginx
+#        image: nginx
 #        tag: latest
 #        pullPolicy: always
 #      securityContext:
@@ -289,7 +294,7 @@ jobs:
 #      extraAnnotations:
 #        testing: 1234
 #      image:
-#        registry: nginx
+#        image: nginx
 #        tag: latest
 #        pullPolicy: always
 #      securityContext:

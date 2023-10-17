@@ -11,10 +11,10 @@ metadata:
     {{- include "chart.basicLabels" $ | nindent 4 }}
 spec:
   accessModes:
-  - {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClass, and a size" .accessMode }}
-  storageClassName: {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClass, and a size" .storageClass }}
+  - {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClassName, and a size" .accessMode }}
+  storageClassName: {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClassName, and a size" .storageClassName }}
   resources:
     requests:
-      storage: {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClass, and a size" .size }}
+      storage: {{ required "Each entry in persistentVolumeClaims needs an accessMode, a storageClassName, and a size" .size }}
 {{- end }}
 {{- end }}
