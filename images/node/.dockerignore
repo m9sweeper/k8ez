@@ -1,0 +1,21 @@
+# Ignore node_modules directory (dependencies will be installed in the Docker image)
+node_modules/
+
+# Ignore development-specific files
+.git/
+.vscode/
+.idea/
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Ignore log and temporary files
+logs/
+temp/
+
+# Ignore build or compiled files (e.g., TypeScript output)
+dist/
+out/
