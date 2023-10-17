@@ -13,14 +13,14 @@ image:
     secretRef: ""
 
 # Default security contetx
-securityContext: 
+securityContext:
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 999 # redis image creates this user
   runAsGroup: 999 # redis image creates this user
 
 # Enable deployment - by default we enable a simple deployment
-deployment: 
+deployment:
   enabled: true
   command: "sh"
   args: ["-c", "sleep 1000"]
@@ -33,7 +33,7 @@ autoscale:
   maxPods: 4
   cpuAverageUtilizationThreshold: 70
 
-podDisruptionBudget: 
+podDisruptionBudget:
   enabled: true
 
 # Enable and configure a service with a reasonable default port
@@ -52,7 +52,7 @@ resources:
 
 # pod liveness and readiness probes to check the applications health
 # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
-# livenessProbe: 
+# livenessProbe:
 #   httpGet:
 #     path: /health
 #     port: 8080
@@ -62,7 +62,7 @@ resources:
 #   initialDelaySeconds: 3
 #   periodSeconds: 3
 
-# readinessProbe: 
+# readinessProbe:
 #   httpGet:
 #     path: /health
 #     port: 8080
@@ -73,23 +73,23 @@ resources:
 #   periodSeconds: 3
 
 # List key/value pairs to be included in this service's ConfigMap
-configData: 
+configData:
   K8EZ: 'YES'
 
 # Set secret data key-value pairs that will be loaded into env variables
 # this expects values are already base64 encoded
-secretData: 
+secretData:
   SECRET: 'dmFsdWU='
 
 # See https://kubernetes.io/docs/concepts/storage/volumes/
-volumes: 
+volumes:
   - name: mydir
     hostPath:
       # Ensure the file directory is created.
       path: /var/local/aaa
       type: DirectoryOrCreate
 
-volumeMounts: 
+volumeMounts:
   - name: mydir
     mountPath: /mount
 
@@ -118,7 +118,7 @@ affinity: {}
 # Kubernetes native ingress and Istio are supported, only enable one or neither of them.
 # If you enable neither you will need to port-forward to dash
 ingress:
-  hosts: 
+  hosts:
     # Add lists of hosts
     - example.local
   path: /
@@ -158,25 +158,43 @@ ingressgateway:
 
 statefulSets:
   enabled: true
-  statefulsets: 
-    - name: abcd
-      image: redis
+  statefulsets:
+    - name: statefulSetWithImageString
+      image: myImageOne
       port: 4000
       serviceType: "ClusterIP"
       replicaCount: 1
       command: "sh"
       args: ["-c", "sleep 1000"]
-      volumes: 
+      volumes:
         - name: mydir
           hostPath:
             # Ensure the file directory is created.
             path: /var/local/aaa
             type: DirectoryOrCreate
-      volumeMounts: 
+      volumeMounts:
         - name: mydir
           mountPath: /mount
-      env: 
+      env:
         ENVVAR: 'value'
+    - name: statefulSetWithImageDict
+      image:
+        image: myImageTwo
+        tag: myTagTwo
+      port: 4000
+    - name: statefulSetWithImageOnly
+      image:
+        image: separateImageOnly
+      port: 4000
+    - name: statefulSetWithTagOnly
+      image:
+        tag: separateTagOnly
+      port: 4000
+    - name: statefulSetWithEmptyImage
+      image:
+      port: 4000
+    - name: statefulSetWithoutImageInfo
+      port: 4000
 
 #############################################################
 # Additional Deployments                                    #
@@ -186,7 +204,7 @@ extraDeployment:
   enabled: true
   hpaExtra: # autoscaling
     enabled: false
-  deployments: 
+  deployments:
     - name: abcde
       image: redis
       port: 4000
@@ -194,23 +212,23 @@ extraDeployment:
       replicaCount: 1
       command: "sh"
       args: ["-c", "sleep 1000"]
-      volumes: 
+      volumes:
         - name: mydir
           hostPath:
             # Ensure the file directory is created.
             path: /var/local/aaa
             type: DirectoryOrCreate
-      volumeMounts: 
+      volumeMounts:
         - name: mydir
           mountPath: /mount
-      env: 
+      env:
         ENVVAR: 'value'
-      
+
       minPods: 2
       maxPods: 4
       cpuAverageUtilizationThreshold: 70
 
-      securityContext: 
+      securityContext:
         runAsUser: 1000
         runAsGroup: 1000
         runAsNonRoot: true
@@ -221,18 +239,18 @@ extraDeployment:
       replicaCount: 1
       command: "sh"
       args: ["-c", "sleep 1000"]
-      volumes: 
+      volumes:
         - name: mydir
           hostPath:
             # Ensure the file directory is created.
             path: /var/local/aaa
             type: DirectoryOrCreate
-      volumeMounts: 
+      volumeMounts:
         - name: mydir
           mountPath: /mount
-      env: 
+      env:
         ENVVAR: 'value'
-      
+
       minPods: 2
       maxPods: 4
       cpuAverageUtilizationThreshold: 70
@@ -244,22 +262,22 @@ extraDeployment:
 
 cronJobs:
   enabled: true
-  scheduled: 
+  scheduled:
     - name: abc
       image: redis
       schedule: "30 * * * *" # every 30 min
       command: "sh"
       args: ["-c", "sleep 1000"]
-      volumes: 
+      volumes:
         - name: mydir
           hostPath:
             # Ensure the file directory is created.
             path: /var/local/aaa
             type: DirectoryOrCreate
-      volumeMounts: 
+      volumeMounts:
         - name: mydir
           mountPath: /mount
-      env: 
+      env:
         ENVVAR: 'value'
 
 ########
@@ -268,21 +286,21 @@ cronJobs:
 
 jobs:
   enabled: true
-  jobs: 
+  jobs:
     - name: hgu
       image: redis
       command: "sh"
       args: ["-c", "sleep 1000"]
-      volumes: 
+      volumes:
         - name: mydir
           hostPath:
             # Ensure the file directory is created.
             path: /var/local/aaa
             type: DirectoryOrCreate
-      volumeMounts: 
+      volumeMounts:
         - name: mydir
           mountPath: /mount
-      env: 
+      env:
         ENVVAR: 'value'
-      extraAnnotations: 
+      extraAnnotations:
         annotation: value

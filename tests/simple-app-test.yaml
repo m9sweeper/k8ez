@@ -3,25 +3,25 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: test-simple-app
+  name: test-simple-app-k8ez
   labels:
-    app: test-simple-app
-    chart: k8ez-0.0.1
+    app: test-simple-app-k8ez
     release: test-simple-app
+    chart: k8ez-1.0.0
     heritage: Helm
-    version: 0.0.1
+    version: 1.0.0
 ---
 # Source: k8ez/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-simple-app
+  name: test-simple-app-k8ez
   labels:
-    app: test-simple-app
-    chart: k8ez-0.0.1
+    app: test-simple-app-k8ez
     release: test-simple-app
+    chart: k8ez-1.0.0
     heritage: Helm
-    version: 0.0.1
+    version: 1.0.0
 spec:
   type: ClusterIP
   ports:
@@ -29,25 +29,25 @@ spec:
       targetPort: 80
       name: http
   selector:
-    app: test-simple-app
+    app: test-simple-app-k8ez
     release: test-simple-app
 ---
 # Source: k8ez/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-simple-app
+  name: test-simple-app-k8ez
   labels:
-    app: test-simple-app
-    chart: k8ez-0.0.1
+    app: test-simple-app-k8ez
     release: test-simple-app
+    chart: k8ez-1.0.0
     heritage: Helm
-    version: 0.0.1
+    version: 1.0.0
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-simple-app
+      app: test-simple-app-k8ez
       release: test-simple-app
   template:
     metadata:
@@ -56,14 +56,13 @@ spec:
         checksum/test-simple-app-k8ez-secret: 7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6
         sidecar.istio.io/inject: "false"
       labels:
-        app: test-simple-app
-        chart: k8ez-0.0.1
+        app: test-simple-app-k8ez
         release: test-simple-app
+        chart: k8ez-1.0.0
         heritage: Helm
-        version: 0.0.1
+        version: 1.0.0
     spec:
-
-      serviceAccount: test-simple-app
+      serviceAccount: test-simple-app-k8ez
       enableServiceLinks: true
       securityContext:
         fsGroup: 1050
@@ -74,19 +73,19 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchExpressions:
-                  - key: app
+                  - key: "app"
                     operator: In
                     values:
-                    - test-simple-app
-                  - key: release
+                    - "test-simple-app-k8ez"
+                  - key: "release"
                     operator: In
                     values:
-                    - test-simple-app
+                    - "test-simple-app"
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "test-simple-app"
-          image: "redis"
-          securityContext: 
+        - name: "test-simple-app-k8ez"
+          image: redis
+          securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
@@ -97,17 +96,10 @@ spec:
             runAsUser: 1050
             seccompProfile:
               type: RuntimeDefault
-
-
-          envFrom:
-
-
           ports:
             - containerPort: 80
-
           resources:
             limits:
-              cpu: 1000m
               memory: 512Mi
             requests:
               cpu: 200m
