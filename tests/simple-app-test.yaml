@@ -1,0 +1,114 @@
+---
+# Source: k8ez/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-simple-app
+  labels:
+    app: test-simple-app
+    chart: k8ez-0.0.1
+    release: test-simple-app
+    heritage: Helm
+    version: 0.0.1
+---
+# Source: k8ez/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-simple-app
+  labels:
+    app: test-simple-app
+    chart: k8ez-0.0.1
+    release: test-simple-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  selector:
+    app: test-simple-app
+    release: test-simple-app
+---
+# Source: k8ez/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-simple-app
+  labels:
+    app: test-simple-app
+    chart: k8ez-0.0.1
+    release: test-simple-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-simple-app
+      release: test-simple-app
+  template:
+    metadata:
+      annotations:
+        checksum/test-simple-app-k8ez-configmap: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+        checksum/test-simple-app-k8ez-secret: 7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: test-simple-app
+        chart: k8ez-0.0.1
+        release: test-simple-app
+        heritage: Helm
+        version: 0.0.1
+    spec:
+
+      serviceAccount: test-simple-app
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 1050
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - test-simple-app
+                  - key: release
+                    operator: In
+                    values:
+                    - test-simple-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: "test-simple-app"
+          image: "redis"
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1050
+            runAsNonRoot: true
+            runAsUser: 1050
+            seccompProfile:
+              type: RuntimeDefault
+
+
+          envFrom:
+
+
+          ports:
+            - containerPort: 80
+
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 200m
+              memory: 128Mi

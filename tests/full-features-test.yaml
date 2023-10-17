@@ -1,0 +1,653 @@
+---
+# Source: k8ez/templates/pod-disruption-budget.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: test-everything-app
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  minAvailable: 50%
+  selector:
+    matchLabels:
+      app: test-everything-app
+      release: test-everything-app
+---
+# Source: k8ez/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-everything-app
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+---
+# Source: k8ez/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-everything-app
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+type: Opaque
+data:
+  SECRET: dmFsdWU=
+---
+# Source: k8ez/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-everything-app
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+data:
+  K8EZ: "YES"
+---
+# Source: k8ez/templates/extra-deployments.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: abcde
+  labels:
+    app: abcde
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  selector:
+    app: abcde
+    release: test-everything-app
+---
+# Source: k8ez/templates/extra-deployments.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: abcdf
+  labels:
+    app: abcdf
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  selector:
+    app: abcdf
+    release: test-everything-app
+---
+# Source: k8ez/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-everything-app
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  selector:
+    app: test-everything-app
+    release: test-everything-app
+---
+# Source: k8ez/templates/statefulsets.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: abcd
+  labels:
+    app: abcd
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  clusterIP: None
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  selector:
+    app: abcd
+---
+# Source: k8ez/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-everything-app
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test-everything-app
+      release: test-everything-app
+  template:
+    metadata:
+      annotations:
+        checksum/test-everything-app-k8ez-configmap: bb54d952d07e66be7a9004707e400ab55feddf185858b8ed7767d13985581178
+        checksum/test-everything-app-k8ez-secret: 12af56d0cc3bed959a9ea3e27ace6e0fa33375694e3aedbc1239618e8d27337b
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: test-everything-app
+        chart: k8ez-0.0.1
+        release: test-everything-app
+        heritage: Helm
+        version: 0.0.1
+    spec:
+
+      serviceAccount: test-everything-app
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 1050
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - test-everything-app
+                  - key: release
+                    operator: In
+                    values:
+                    - test-everything-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: "test-everything-app"
+          image: "redis"
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+
+          command: ["sh"]
+
+          args: 
+          - -c
+          - sleep 1000
+          envFrom:
+
+          - configMapRef:
+              name: test-everything-app
+
+          - secretRef:
+              name: test-everything-app
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /mount
+              name: mydir
+
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+      - hostPath:
+          path: /var/local/aaa
+          type: DirectoryOrCreate
+        name: mydir
+---
+# Source: k8ez/templates/extra-deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abcde
+  labels:
+    app: abcde
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: abcde
+      release: test-everything-app
+  template:
+    metadata:
+      annotations:
+        checksum/test-everything-app-k8ez-configmap: bb54d952d07e66be7a9004707e400ab55feddf185858b8ed7767d13985581178
+        checksum/test-everything-app-k8ez-secret: 12af56d0cc3bed959a9ea3e27ace6e0fa33375694e3aedbc1239618e8d27337b
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: abcde
+        chart: k8ez-0.0.1
+        release: test-everything-app
+        heritage: Helm
+        version: 0.0.1
+    spec:
+      
+      serviceAccount: test-everything-app
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 1050
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - abcde
+                  - key: release
+                    operator: In
+                    values:
+                    - test-everything-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: "abcde"
+          image: "redis"
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+
+          command: ["sh"]
+
+          args: 
+          - -c
+          - sleep 1000
+
+          env:
+          - name: "ENVVAR"
+            value: "value"
+          envFrom:
+
+          - configMapRef:
+              name: test-everything-app
+
+          - secretRef:
+              name: test-everything-app
+          ports:
+            - containerPort: 4000
+          volumeMounts:
+          - mountPath: /mount
+            name: mydir
+
+      volumes:
+      - hostPath:
+          path: /var/local/aaa
+          type: DirectoryOrCreate
+        name: mydir
+---
+# Source: k8ez/templates/extra-deployments.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abcdf
+  labels:
+    app: abcdf
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: abcdf
+      release: test-everything-app
+  template:
+    metadata:
+      annotations:
+        checksum/test-everything-app-k8ez-configmap: bb54d952d07e66be7a9004707e400ab55feddf185858b8ed7767d13985581178
+        checksum/test-everything-app-k8ez-secret: 12af56d0cc3bed959a9ea3e27ace6e0fa33375694e3aedbc1239618e8d27337b
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: abcdf
+        chart: k8ez-0.0.1
+        release: test-everything-app
+        heritage: Helm
+        version: 0.0.1
+    spec:
+      
+      serviceAccount: test-everything-app
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 1050
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - abcdf
+                  - key: release
+                    operator: In
+                    values:
+                    - test-everything-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: "abcdf"
+          image: "redis"
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+
+          command: ["sh"]
+
+          args: 
+          - -c
+          - sleep 1000
+
+          env:
+          - name: "ENVVAR"
+            value: "value"
+          envFrom:
+
+          - configMapRef:
+              name: test-everything-app
+
+          - secretRef:
+              name: test-everything-app
+          ports:
+            - containerPort: 4000
+          volumeMounts:
+          - mountPath: /mount
+            name: mydir
+
+      volumes:
+      - hostPath:
+          path: /var/local/aaa
+          type: DirectoryOrCreate
+        name: mydir
+---
+# Source: k8ez/templates/statefulsets.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: abcd
+  labels:
+    app: abcd
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: abcd
+      release: test-everything-app
+  serviceName: abcd
+  template:
+    metadata:
+      annotations:
+        checksum/test-everything-app-k8ez-configmap: bb54d952d07e66be7a9004707e400ab55feddf185858b8ed7767d13985581178
+        checksum/test-everything-app-k8ez-secret: 12af56d0cc3bed959a9ea3e27ace6e0fa33375694e3aedbc1239618e8d27337b
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: abcd
+        chart: k8ez-0.0.1
+        release: test-everything-app
+        heritage: Helm
+        version: 0.0.1
+    spec:
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 1050
+      terminationGracePeriodSeconds: 10
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - abcd
+                  - key: release
+                    operator: In
+                    values:
+                    - test-everything-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: abcd
+          image: "redis"
+          securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+
+          command: ["sh"]
+
+          args: 
+          - -c
+          - sleep 1000
+          ports:
+            - containerPort: 4000
+
+          env:
+          - name: "ENVVAR"
+            value: "value"
+          envFrom:
+
+          - configMapRef:
+              name: test-everything-app
+
+          - secretRef:
+              name: test-everything-app
+          volumeMounts:
+          - mountPath: /mount
+            name: mydir
+
+      volumes:
+      - hostPath:
+          path: /var/local/aaa
+          type: DirectoryOrCreate
+        name: mydir
+---
+# Source: k8ez/templates/jobs.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hgu
+
+  annotations:
+    
+    annotation: value
+
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      
+      serviceAccount: test-everything-app
+      enableServiceLinks: true
+      securityContext:
+        fsGroup: 1050
+      containers:
+      - name: hgu
+        image: "redis"
+        securityContext: 
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+
+        volumeMounts:
+        - mountPath: /mount
+          name: mydir
+
+        command: ["sh"]
+
+        args: 
+        - -c
+        - sleep 1000
+
+        env:
+        - name: "ENVVAR"
+          value: "value"
+        envFrom:
+
+          - configMapRef:
+              name: test-everything-app
+
+          - secretRef:
+              name: test-everything-app
+      restartPolicy: Never
+      volumes:
+      - hostPath:
+          path: /var/local/aaa
+          type: DirectoryOrCreate
+        name: mydir
+  backoffLimit: 0
+---
+# Source: k8ez/templates/cronjobs.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: abc
+  labels:
+    app: test-everything-app
+    chart: k8ez-0.0.1
+    release: test-everything-app
+    heritage: Helm
+    version: 0.0.1
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          
+          serviceAccount: test-everything-app
+          enableServiceLinks: true
+          securityContext:
+            fsGroup: 1050
+          containers:
+            - name: abc
+              image: "redis"
+              securityContext: 
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                privileged: false
+                runAsGroup: 999
+                runAsNonRoot: true
+                runAsUser: 999
+                seccompProfile:
+                  type: RuntimeDefault
+
+              volumeMounts:
+              - mountPath: /mount
+                name: mydir
+
+              command: ["sh"]
+
+              args: 
+              - -c
+              - sleep 1000
+
+              env:
+              - name: "ENVVAR"
+                value: "value"
+              envFrom:
+
+              - configMapRef:
+                  name: test-everything-app
+
+              - secretRef:
+                  name: test-everything-app
+          restartPolicy: Never
+          volumes:
+          - hostPath:
+              path: /var/local/aaa
+              type: DirectoryOrCreate
+            name: mydir
+  schedule: "30 * * * *"
