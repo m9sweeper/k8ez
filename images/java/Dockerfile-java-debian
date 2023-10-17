@@ -1,0 +1,45 @@
+# ---- Build Stage ----
+FROM openjdk:17-jdk-slim AS build
+
+# Set up environment variables for Maven
+ENV MAVEN_VERSION 3.9.5
+ENV MAVEN_HOME /usr/share/maven
+
+# Update and install required packages
+RUN apt-get update && \
+    apt-get install -y curl && \
+    mkdir -p $MAVEN_HOME
+
+RUN curl -fsSL https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar -xzC $MAVEN_HOME --strip-components=1
+
+# Set Maven path
+RUN ln -s $MAVEN_HOME/bin/mvn /usr/bin/mvn
+
+# Specify the work directory
+WORKDIR /app
+
+# Copy your project's pom.xml and source code
+COPY ./pom.xml .
+COPY ./src ./src
+
+# Run the Maven build
+RUN mvn clean package -DskipTests
+
+# ---- Run Stage ----
+FROM openjdk:11-jre-slim
+
+# Create a group and user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Specify the work directory and set permissions
+WORKDIR /app
+RUN chown appuser:appuser /app
+
+# Copy the built JAR from the build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Change to non-root user
+USER appuser
+
+# Specify the entrypoint command to run on container start
+ENTRYPOINT ["java", "-jar", "app.jar"]
