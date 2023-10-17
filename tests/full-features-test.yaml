@@ -6,7 +6,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -15,7 +15,7 @@ spec:
   selector:
     matchLabels:
       app: test-everything-app-k8singress
-      release: placeholder
+      release: test-everything-app
 ---
 # Source: k8ez/templates/serviceaccount.yaml
 apiVersion: v1
@@ -24,7 +24,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -36,7 +36,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -51,7 +51,7 @@ metadata:
   name: all-yaml
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -67,7 +67,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -81,7 +81,7 @@ metadata:
   name: test-everything-app-k8singress-myvolumeclaim
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -102,7 +102,7 @@ metadata:
     app: test-everything-app-k8singress-extra-redis-deployment-one
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   type: ClusterIP
@@ -112,7 +112,7 @@ spec:
       name: http
   selector:
       app: test-everything-app-k8singress-extra-redis-deployment-one
-      release: placeholder
+      release: test-everything-app
 ---
 # Source: k8ez/templates/extra-deployments.yaml
 apiVersion: v1
@@ -123,7 +123,7 @@ metadata:
     app: test-everything-app-k8singress-extra-redis-deployment-two
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   type: ClusterIP
@@ -133,7 +133,7 @@ spec:
       name: http
   selector:
       app: test-everything-app-k8singress-extra-redis-deployment-two
-      release: placeholder
+      release: test-everything-app
 ---
 # Source: k8ez/templates/service.yaml
 apiVersion: v1
@@ -142,7 +142,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -154,7 +154,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
@@ -165,7 +165,7 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithImageString
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   clusterIP: None  
@@ -175,7 +175,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress-statefulSetWithImageString
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
@@ -186,7 +186,7 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithImageDict
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   clusterIP: None  
@@ -196,7 +196,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress-statefulSetWithImageDict
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
@@ -207,7 +207,7 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithImageOnly
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   clusterIP: None  
@@ -217,7 +217,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress-statefulSetWithImageOnly
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
@@ -228,7 +228,7 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithTagOnly
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   clusterIP: None  
@@ -238,7 +238,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress-statefulSetWithTagOnly
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
@@ -249,7 +249,7 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithEmptyImage
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   clusterIP: None  
@@ -259,7 +259,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress-statefulSetWithEmptyImage
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/statefulsets.yaml
 apiVersion: v1
@@ -270,7 +270,7 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithoutImageInfo
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   clusterIP: None  
@@ -280,7 +280,7 @@ spec:
       name: http
   selector:
     app: test-everything-app-k8singress-statefulSetWithoutImageInfo
-    release: placeholder
+    release: test-everything-app
 ---
 # Source: k8ez/templates/deployment.yaml
 apiVersion: apps/v1
@@ -289,7 +289,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -298,17 +298,17 @@ spec:
   selector:
     matchLabels:
       app: test-everything-app-k8singress
-      release: placeholder
+      release: test-everything-app
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"
         someExtraAnnotation: annotationValueHere
       labels:
         app: test-everything-app-k8singress
-        release: placeholder
+        release: test-everything-app
         chart: k8ez-1.0.0
         heritage: Helm
         version: 1.0.0
@@ -331,7 +331,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress"
@@ -382,26 +382,26 @@ metadata:
     app: test-everything-app-k8singress-extra-redis-deployment-one
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: test-everything-app-k8singress-extra-redis-deployment-one
-      release: placeholder
+      release: test-everything-app
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         someExtraAnnotation: annotationValueHere
       labels:
         app: test-everything-app-k8singress-extra-redis-deployment-one
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       serviceAccount: test-everything-app-k8singress
@@ -422,7 +422,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                      - "placeholder"
+                      - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-extra-redis-deployment-one"
@@ -481,26 +481,26 @@ metadata:
     app: test-everything-app-k8singress-extra-redis-deployment-two
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: test-everything-app-k8singress-extra-redis-deployment-two
-      release: placeholder
+      release: test-everything-app
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         someExtraAnnotation: annotationValueHere
       labels:
         app: test-everything-app-k8singress-extra-redis-deployment-two
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       serviceAccount: test-everything-app-k8singress
@@ -521,7 +521,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                      - "placeholder"
+                      - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-extra-redis-deployment-two"
@@ -580,20 +580,20 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithImageString
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: test-everything-app-k8singress-statefulSetWithImageString
-      release: placeholder
+      release: test-everything-app
   serviceName: test-everything-app-k8singress-statefulSetWithImageString
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         annotationInfo: exclude global, include extras
         imageType: image string
@@ -603,7 +603,7 @@ spec:
         app: test-everything-app-k8singress-statefulSetWithImageString
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       enableServiceLinks: true
@@ -624,7 +624,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-statefulSetWithImageString"
@@ -680,20 +680,20 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithImageDict
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 
   selector:
     matchLabels:
       app: test-everything-app-k8singress-statefulSetWithImageDict
-      release: placeholder
+      release: test-everything-app
   serviceName: test-everything-app-k8singress-statefulSetWithImageDict
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         someExtraAnnotation: annotationValueHere
         annotationInfo: include global and extras
@@ -702,7 +702,7 @@ spec:
         app: test-everything-app-k8singress-statefulSetWithImageDict
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       enableServiceLinks: true
@@ -723,7 +723,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-statefulSetWithImageDict"
@@ -769,20 +769,20 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithImageOnly
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 
   selector:
     matchLabels:
       app: test-everything-app-k8singress-statefulSetWithImageOnly
-      release: placeholder
+      release: test-everything-app
   serviceName: test-everything-app-k8singress-statefulSetWithImageOnly
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         someExtraAnnotation: annotationValueHere
         annotationInfo: include global and extras
@@ -791,7 +791,7 @@ spec:
         app: test-everything-app-k8singress-statefulSetWithImageOnly
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       enableServiceLinks: true
@@ -812,7 +812,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-statefulSetWithImageOnly"
@@ -858,20 +858,20 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithTagOnly
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 
   selector:
     matchLabels:
       app: test-everything-app-k8singress-statefulSetWithTagOnly
-      release: placeholder
+      release: test-everything-app
   serviceName: test-everything-app-k8singress-statefulSetWithTagOnly
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         someExtraAnnotation: annotationValueHere
         annotationInfo: include global and extras
@@ -880,7 +880,7 @@ spec:
         app: test-everything-app-k8singress-statefulSetWithTagOnly
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       enableServiceLinks: true
@@ -901,7 +901,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-statefulSetWithTagOnly"
@@ -947,20 +947,20 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithEmptyImage
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 
   selector:
     matchLabels:
       app: test-everything-app-k8singress-statefulSetWithEmptyImage
-      release: placeholder
+      release: test-everything-app
   serviceName: test-everything-app-k8singress-statefulSetWithEmptyImage
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         annotationInfo: exclude global, include extras
         imageType: empty dictionary (should use default)
@@ -968,7 +968,7 @@ spec:
         app: test-everything-app-k8singress-statefulSetWithEmptyImage
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       enableServiceLinks: true
@@ -989,7 +989,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-statefulSetWithEmptyImage"
@@ -1034,20 +1034,20 @@ metadata:
     app: test-everything-app-k8singress-statefulSetWithoutImageInfo
     chart: k8ez-1.0.0
     heritage: Helm
-    release: placeholder
+    release: test-everything-app
     version: 1.0.0
 spec:
   replicas: 
   selector:
     matchLabels:
       app: test-everything-app-k8singress-statefulSetWithoutImageInfo
-      release: placeholder
+      release: test-everything-app
   serviceName: test-everything-app-k8singress-statefulSetWithoutImageInfo
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         annotationInfo: exclude global, include extras
         imageType: none included (should use default)
@@ -1055,7 +1055,7 @@ spec:
         app: test-everything-app-k8singress-statefulSetWithoutImageInfo
         chart: k8ez-1.0.0
         heritage: Helm
-        release: placeholder
+        release: test-everything-app
         version: 1.0.0
     spec:
       enableServiceLinks: true
@@ -1076,7 +1076,7 @@ spec:
                   - key: "release"
                     operator: In
                     values:
-                    - "placeholder"
+                    - "test-everything-app"
               topologyKey: kubernetes.io/hostname
       containers:
         - name: "test-everything-app-k8singress-statefulSetWithoutImageInfo"
@@ -1118,16 +1118,16 @@ kind: Job
 metadata:
   name: test-everything-app-k8singress-job-example-job
   annotations:
-    checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-    checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa    
+    checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+    checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0    
     someExtraAnnotation: annotationValueHere
     jobExtraAnnotation: something
 spec:
   template:
     metadata:
       annotations:
-        checksum/test-everything-app-k8singress-configmap: 642a15a5571f233f33c6f249d7d6e6d2fb5694e9360fd43731ce45572b5c18b0
-        checksum/test-everything-app-k8singress-secret: 4b69dfb7cbe64f73520f447576c62c019408da242ad17e5f4937a1cfc8ed69aa
+        checksum/test-everything-app-k8singress-configmap: 83f794ea81324fa350b2ebc76548f594f446c0a0965940db06e78eac1255f5da
+        checksum/test-everything-app-k8singress-secret: 4586f2e4728e3f70a1788b34905c74de5f0363156a8b553bda797c5a139ffee0
         sidecar.istio.io/inject: "false"        
         someExtraAnnotation: annotationValueHere
         jobExtraAnnotation: something
@@ -1191,7 +1191,7 @@ metadata:
   name: test-everything-app-k8singress-example-cronjob
   labels:  
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
@@ -1262,7 +1262,7 @@ metadata:
   name: test-everything-app-k8singress
   labels:
     app: test-everything-app-k8singress
-    release: placeholder
+    release: test-everything-app
     chart: k8ez-1.0.0
     heritage: Helm
     version: 1.0.0
