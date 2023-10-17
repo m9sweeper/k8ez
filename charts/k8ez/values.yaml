@@ -34,13 +34,12 @@ podSecurityContext:
   fsGroup: 1050
 
 # Specify image pull secrets if required or if you have it creating registry credentials
-# imagePullSecrets: 
+# imagePullSecrets:
 # - name: Release.name--registry-secret
 
 # Enable deployment - by default we enable a simple deployment
-deployment: 
+deployment:
   enabled: true
-  mainContainerNameOverride: ""
   command: ""
   args: []
   # by default, disable initContainers
@@ -65,7 +64,7 @@ autoscale:
   maxPods: 4
   cpuAverageUtilizationThreshold: 70
 
-podDisruptionBudget: 
+podDisruptionBudget:
   enabled: false
 
 # Enable and configure a service with a reasonable default port
