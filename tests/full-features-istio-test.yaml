@@ -111,8 +111,8 @@ spec:
       targetPort: 4000
       name: http
   selector:
-      app: test-everything-app-ingress-extra-redis-deployment-one
-      release: test-everything-app
+    app: test-everything-app-ingress-extra-redis-deployment-one
+    release: test-everything-app
 ---
 # Source: k8ez/templates/extra-deployments.yaml
 apiVersion: v1
@@ -132,8 +132,8 @@ spec:
       targetPort: 4000
       name: http
   selector:
-      app: test-everything-app-ingress-extra-redis-deployment-two
-      release: test-everything-app
+    app: test-everything-app-ingress-extra-redis-deployment-two
+    release: test-everything-app
 ---
 # Source: k8ez/templates/service.yaml
 apiVersion: v1
@@ -168,7 +168,7 @@ metadata:
     release: test-everything-app
     version: 1.0.0
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: 4000
       targetPort: 4000
@@ -189,7 +189,7 @@ metadata:
     release: test-everything-app
     version: 1.0.0
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: 4000
       targetPort: 4000
@@ -210,7 +210,7 @@ metadata:
     release: test-everything-app
     version: 1.0.0
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: 4000
       targetPort: 4000
@@ -231,7 +231,7 @@ metadata:
     release: test-everything-app
     version: 1.0.0
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: 4000
       targetPort: 4000
@@ -252,7 +252,7 @@ metadata:
     release: test-everything-app
     version: 1.0.0
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: 4000
       targetPort: 4000
@@ -273,7 +273,7 @@ metadata:
     release: test-everything-app
     version: 1.0.0
 spec:
-  clusterIP: None  
+  clusterIP: None
   ports:
     - port: 4000
       targetPort: 4000

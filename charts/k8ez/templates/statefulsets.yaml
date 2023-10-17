@@ -168,7 +168,7 @@ metadata:
     {{- end }}
     {{- end }}
 spec:
-  clusterIP: None  {{/*  aka a headless service*/}}
+  clusterIP: None  {{- /*  aka a headless service*/}}
   ports:
     - port: {{ .port }}
       targetPort: {{ or .targetPort .port }}

@@ -214,12 +214,12 @@ spec:
       targetPort: {{ or .targetPort .port }}
       name: http
   selector:
-      {{- range $k, $v := $dictOfBasicSelectorLabels }}
-      {{- if eq $k "app" }}
-      {{ $k }}: {{ $deploymentFullName }}
-      {{- else}}
-      {{ $k }}: {{ $v }}
-      {{- end }}
-      {{- end }}
+    {{- range $k, $v := $dictOfBasicSelectorLabels }}
+    {{- if eq $k "app" }}
+    {{ $k }}: {{ $deploymentFullName }}
+    {{- else}}
+    {{ $k }}: {{ $v }}
+    {{- end }}
+    {{- end }}
 {{- end }}
 {{- end }}
