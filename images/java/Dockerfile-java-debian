@@ -41,5 +41,7 @@ COPY --from=build /app/target/*.jar app.jar
 # Change to non-root user
 USER appuser
 
+EXPOSE 8080
+
 # Specify the entrypoint command to run on container start
 ENTRYPOINT ["java", "-jar", "app.jar"]
