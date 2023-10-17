@@ -3,7 +3,7 @@
 #########################################################
 # Overrides for the name
 nameOverride: ""
-fullNameOverride: ""
+fullnameOverride: ""
 
 # Image and any required credentials to download it for the default deployment
 image:
