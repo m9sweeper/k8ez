@@ -2,23 +2,7 @@
 # DOCKER IMAGE - Debian based Nodejs Application (Express.js) #
 ###############################################################
 
-FROM debian:latest
-
-# Install any dependencies for building & commands to use
-RUN apt-get update && apt-get install -y python3 make curl
-
-# Set verions of using packages
-ARG NODE_VERSION=18
-
-# Install NodeJS
-RUN apt-get update -yq \
-    && apt-get install -yq ca-certificates curl gnupg \
-    && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update -yq \
-    && apt-get install nodejs -yq \
-    && npm install -g npm
+FROM node:20-bookworm-slim
 
 # Set the working directory within the container
 WORKDIR /app
@@ -26,11 +10,14 @@ WORKDIR /app
 # Copy both package.json and package-lock.json
 COPY package*.json ./
 
+# Install application dependencies
+RUN npm install
+
 # Copy the application code into the container
 COPY . /app
 
-# Install application dependencies
-RUN npm install
+# Omitting dev dependencies
+RUN npm ci --omit=dev
 
 # Create the "limitedaccessgroup" group
 RUN groupadd limitedaccessgroup
@@ -47,5 +34,5 @@ USER 1050
 # Expose the port that the Express.js application will run on (default is 3000)
 EXPOSE 3000
 
-# Define the command to start the Express.js application
-CMD node app.js
+# Define the entrypoint to start the Express.js application
+ENTRYPOINT ["node", "app.js"]

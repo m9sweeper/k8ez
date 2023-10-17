@@ -2,10 +2,7 @@
 # DOCKER IMAGE - Alpine based Nodejs Application (Express.js) #
 ###############################################################
 
-FROM alpine:latest
-
-# Install nodejs
-RUN apk add --update nodejs npm
+FROM node:20-alpine
 
 # Set the working directory within the container
 WORKDIR /app
@@ -13,11 +10,14 @@ WORKDIR /app
 # copy both package.json AND package-lock.json if available
 COPY package*.json ./
 
+# Install application dependencies
+RUN npm install
+
 # Copy the application code into the container
 COPY . /app
 
-# Install application dependencies
-RUN npm install
+# Omitting dev dependencies
+RUN npm ci --omit=dev
 
 # Create non root user
 RUN addgroup -g 1050 -S limitedaccessaccount && \
@@ -30,4 +30,4 @@ USER 1050
 EXPOSE 3000
 
 # Define the command to start the Express.js application
-CMD node app.js
+ENTRYPOINT ["node", "app.js"]
