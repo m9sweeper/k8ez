@@ -2,8 +2,8 @@
 # Define the main deployment of the app                 #
 #########################################################
 # Overrides for the name
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ""  # chart name override
+fullnameOverride: ""  # full name override (install + chart name)
 
 # Image and any required credentials to download it for the default deployment
 image:
