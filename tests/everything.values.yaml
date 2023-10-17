@@ -142,6 +142,7 @@ ingress:
     enabled: false
     loadBalancerType: ROUND_ROBIN
     mtlsMode: "PERMISSIVE"
+    forceHttpRedirect: false
 
 ingressgateway:
   enabled: false
