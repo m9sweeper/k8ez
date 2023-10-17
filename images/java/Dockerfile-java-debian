@@ -41,6 +41,7 @@ COPY --from=build /app/target/*.jar app.jar
 # Change to non-root user
 USER appuser
 
+# Expose the port that the Spring Boot application will run on (default is 8080)
 EXPOSE 8080
 
 # Specify the entrypoint command to run on container start
