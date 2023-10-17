@@ -51,20 +51,28 @@ version: {{ .Chart.Version }}
 {{- end -}}
 
 {{/*
-Builds full image path
-IF .image isn't defined,
-use $.Values.image
-IF .image.registry isn't defined,
-use $.Values.image.registry
-IF .image.tag isn't defined,
-use $.Values.image.tag
-IF $.Values.image isn't defined, throw errors
+Builds the full image path
+Tested by the array of Stateful Sets
 */}}
 {{- define "chart.buildImagePath" -}}
-{{- $image_path := default .values.image .image }}
-{{- $image_registry := default .values.image.registry $image_path.registry }}
-{{- $image_tag := default .values.image.tag $image_path.tag }}
-{{- $image_registry }}:{{ $image_tag }}
+  {{- if .image }}{{/* IF .image is defined */}}
+    {{- if (kindIs "map" .image) }}
+      {{- $image_to_use := default .values.image.image .image.image }}
+      {{- if .image.tag }}
+        {{- $image_to_use }}:{{ .image.tag }}{{/* ENDPOINT ONE */}}
+      {{- else }}{{/* if not .image.tag */}}
+        {{- $image_to_use }}{{/* ENDPOINT TWO */}}
+      {{- end }}{{/* ends if .image.tag */}}
+    {{- else -}} {{/* if not (kindIs "map" .image) */}}
+      {{- .image }}{{/* ENDPOINT THREE */}}
+    {{- end }}{{/* ends if (kindIs "map" .image) */}}
+  {{- else -}} {{/* if not .image */}}
+    {{- if .values.image.tag }}
+      {{- .values.image.image }}:{{ .values.image.tag }}{{/* ENDPOINT FOUR A */}}
+    {{- else -}}{{/* if not .values.image.tag */}}
+      {{- .values.image.image }}{{/* ENDPOINT FOUR B */}}
+    {{- end }}{{/* end if .values.image.tag */}}
+  {{- end }}{{/* ends if .image */}}
 {{- end }}
 
 {{/*

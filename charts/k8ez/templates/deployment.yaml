@@ -98,7 +98,11 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "chart.fullname" . | quote }}
-          image: {{ required "You must include image.registry" .Values.image.registry }}:{{ required "You must include image.tag" .Values.image.tag }}
+          {{- if .Values.image.tag }}
+          image: {{ required "You must include image.image" .Values.image.image }}:{{ .Values.image.tag }}
+          {{- else }}
+          image: {{ required "You must include image.image" .Values.image.image }}
+          {{- end }}
           securityContext:
             {{- toYaml (required ".Values.securityContexts is required" .Values.securityContext) | nindent 12 }}
           ports:

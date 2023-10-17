@@ -36,12 +36,13 @@ spec:
       containers:
       - name: {{ $jobFullName | quote }}
         image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) | quote }}
-        {{- if and .image (default dict .image).pullPolicy }}
+        {{- if and .image (kindIs "map" .image) }}
+        {{/* commented out: - if and .image (default dict .image).pullPolicy */}}
         imagePullPolicy: {{ .image.pullPolicy }}
         {{- else }}
         imagePullPolicy: {{ $.Values.image.pullPolicy }}
         {{- end }}
-        securityContext: 
+        securityContext:
           {{- toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | nindent 10 }}
 
         {{- if .command }}

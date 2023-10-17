@@ -72,7 +72,8 @@ spec:
       containers:
         - name: {{ $statefulSetFullName | quote }}
           image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) | quote }}
-          {{- if and .image (default dict .image).pullPolicy }}
+          {{- if and .image (kindIs "map" .image) }}
+          {{/* commented out: - if and .image (default dict .image).pullPolicy */}}
           imagePullPolicy: {{ .image.pullPolicy }}
           {{- else }}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
