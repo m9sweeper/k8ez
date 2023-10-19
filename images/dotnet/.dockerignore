@@ -1,0 +1,20 @@
+# Ignore .NET Core build output directories
+bin/
+obj/
+
+# Ignore any local development settings and logs
+*.user
+*.userosscache
+*.cache
+*.vscode/
+*.vs/
+*.log
+./idea
+
+# Ignore git directory and files
+.git/
+
+# Ignore other unnecessary files
+README.md
+LICENSE
+.dockerignore
