@@ -9,7 +9,7 @@ obj/
 *.vscode/
 *.vs/
 *.log
-./idea
+.idea/
 
 # Ignore git directory and files
 .git/
