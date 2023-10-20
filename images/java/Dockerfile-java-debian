@@ -1,45 +1,38 @@
 # ---- Build Stage ----
-FROM openjdk:17-jdk-slim AS build
+FROM maven:3.9.4-amazoncorretto-17-debian AS build
 
-# Set up environment variables for Maven
-ENV MAVEN_VERSION 3.9.5
-ENV MAVEN_HOME /usr/share/maven
-
-# Update and install required packages
-RUN apt-get update && \
-    apt-get install -y curl && \
-    mkdir -p $MAVEN_HOME
-
-RUN curl -fsSL https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar -xzC $MAVEN_HOME --strip-components=1
-
-# Set Maven path
-RUN ln -s $MAVEN_HOME/bin/mvn /usr/bin/mvn
-
-# Specify the work directory
+# Set the current working directory inside the image
 WORKDIR /app
 
-# Copy your project's pom.xml and source code
-COPY ./pom.xml .
-COPY ./src ./src
+# Copy the pom.xml file
+COPY pom.xml .
 
-# Run the Maven build
-RUN mvn clean package -DskipTests
+# Build all the dependencies in preparation to go offline.
+# This is a separate step so the dependencies will be cached unless
+# the pom.xml file has changed.
+RUN mvn dependency:go-offline -B
+
+# Copy the project source
+COPY . .
+
+# Package the application
+RUN mvn package -DskipTests
 
 # ---- Run Stage ----
 FROM openjdk:11-jre-slim
 
-# Create a group and user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Create a group and a non root user
+RUN groupadd -r limitedaccessuser && useradd -r -g limitedaccessuser limitedaccessuser
 
 # Specify the work directory and set permissions
 WORKDIR /app
-RUN chown appuser:appuser /app
+RUN chown limitedaccessuser:limitedaccessuser /app
 
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
 # Change to non-root user
-USER appuser
+USER limitedaccessuser
 
 # Expose the port that the Spring Boot application will run on (default is 8080)
 EXPOSE 8080
