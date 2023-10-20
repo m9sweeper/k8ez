@@ -18,3 +18,19 @@ obj/
 README.md
 LICENSE
 .dockerignore
+Dockerfile
+charts/
+azure-pipelines.yml
+docker-compose.yaml
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
