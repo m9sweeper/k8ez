@@ -1,0 +1,62 @@
+# Use the official PHP 8.1 image with Apache as the base image
+FROM php:8.1.24-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libonig-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    curl
+
+# Clear out the local repository of retrieved package files
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
+
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy existing application directory contents
+COPY . /var/www/html
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Create non root user and group for Laravel
+RUN groupadd -g 1000 laraveluser
+RUN useradd -u 1000 -ms /bin/bash -g laraveluser laraveluser
+
+# Change ownership of our applications
+RUN chown -R laraveluser:laraveluser /var/www/html
+
+# Set Apache Document Root to Laravel public directory
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+# Update Apache configuration to point to the new document root
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Set Apache ServerName
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Enable Apache mod_rewrite for URL rewriting
+RUN a2enmod rewrite
+
+# Expose port 80 and start apache server
+EXPOSE 80
+
+# Switch to the non root user
+USER laraveluser
+
+ENTRYPOINT ["apache2-foreground"]
