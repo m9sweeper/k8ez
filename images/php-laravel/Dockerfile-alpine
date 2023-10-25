@@ -1,0 +1,53 @@
+# pull PHP image with Apache, Alpine version
+FROM webdevops/php-apache-dev:8.2-alpine
+
+# Install dependencies
+RUN apk --no-cache add \
+    libzip-dev \
+    zip \
+    supervisor \
+    && docker-php-ext-install pdo pdo_mysql zip
+
+# Enable Apache mod_rewrite
+RUN sed -i '/LoadModule rewrite_module/s/^#//g' /etc/apache2/httpd.conf
+
+# Copy the application code to the container
+COPY . /var/www/html
+
+# Set the working directory
+WORKDIR /var/www/html
+
+COPY /logs/laravel_err.log /var/log/laravel_err.log
+COPY /logs/laravel.log /var/log/laravel.log
+COPY ./docker-entrypoint.sh /
+
+# Copy the supervisor configuration file
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create non root user
+RUN addgroup -g 1001 -S limitedaccessaccount && \
+    adduser -u 1001 -S limitedaccessaccount -G limitedaccessaccount && \
+    chown -R limitedaccessaccount:limitedaccessaccount /var/www/html && \
+    chmod -R 0777 /var/www/html && \
+    chmod +x /var/www/html/docker-entrypoint.sh
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-scripts --no-autoloader
+
+# Set file permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 777 /var/www/html/storage/ \
+    && chmod 755 /etc/supervisor/conf.d/supervisord.conf \
+    && chmod 777 /var/log/laravel_err.log \
+    && chmod 777 /var/log/laravel.log \
+    && chmod +x /var/www/html/docker-entrypoint.sh
+
+# Expose port 8000
+EXPOSE 8000
+
+# Switch to non-root user
+USER 1001
+
+# Start Supervisor as non-root user
+CMD ["sh", "/docker-entrypoint.sh"]
