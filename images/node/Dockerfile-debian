@@ -10,14 +10,11 @@ WORKDIR /app
 # Copy both package.json and package-lock.json
 COPY package*.json ./
 
-# Install application dependencies
-RUN npm install
+# Installing application dependencies (but not dev dependencies)
+RUN npm ci --omit=dev
 
 # Copy the application code into the container
 COPY . /app
-
-# Omitting dev dependencies
-RUN npm ci --omit=dev
 
 # Create the "limitedaccessgroup" group
 RUN groupadd limitedaccessgroup
