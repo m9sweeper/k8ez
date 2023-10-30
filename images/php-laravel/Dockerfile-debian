@@ -1,45 +1,48 @@
-# Use an official PHP image with PHP-FPM support
+# Use the official PHP image with FPM
 FROM php:8.1-fpm
 
-# Install system dependencies, PHP extensions, and Supervisor
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
+    git \
+    curl \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
     apache2 \
-    supervisor \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql zip \
-    && a2enmod rewrite proxy proxy_fcgi \
-    && rm -rf /var/lib/apt/lists/*
+    libapache2-mod-fcgid \
+    supervisor
 
-# Configure Apache as a reverse proxy to PHP-FPM
-RUN echo "ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://127.0.0.1:9000/var/www/app/public/$1" > /etc/apache2/conf-available/php-fpm-proxy.conf && \
-    a2enconf php-fpm-proxy
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy Supervisor configuration file
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Set working directory
+WORKDIR /var/www
+
+# Copy existing application directory contents
+COPY . /var/www
+
+# Copy existing application directory permissions
+COPY --chown=www-data:www-data . /var/www
+
+# Copy Apache vhost file to proxy php requests to php-fpm service
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Copy supervisor configuration file
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Create a non-root user and give access to the app directory
-RUN groupadd -r limitedaccessaccount && useradd -r -g limitedaccessaccount limitedaccessaccount \
-    && mkdir -p /var/www/app /var/log/php /var/log/apache2 \
-    && chown -R limitedaccessaccount:limitedaccessaccount /var/www/app /var/log/php /var/log/apache2 \
-    && chmod -R 755 /var/www/app
+# Enable Apache mods
+RUN a2enmod proxy_fcgi
 
-# Set the working directory
-WORKDIR /var/www/app
-
-# Ensure the log directories exist
-RUN chown www-data:www-data /var/log/php /var/log/apache2
-
-# Switch to the non-root user
-USER limitedaccessaccount
-
-# Expose port 80 for Apache
+# Expose port 80
 EXPOSE 80
 
-USER root
-
-# Start services using Supervisor
-CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start supervisord
+CMD ["/usr/bin/supervisord"]
