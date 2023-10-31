@@ -32,7 +32,7 @@ COPY . /var/www
 # Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www
 
-# Copy Apache vhost file to proxy php requests to php-fpm service
+# Copy Apache apache.conf file to proxy php requests to php-fpm service
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Copy supervisor configuration file
@@ -40,6 +40,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Enable Apache mods
 RUN a2enmod proxy_fcgi
+RUN a2enmod rewrite
 
 # Expose port 80
 EXPOSE 80
