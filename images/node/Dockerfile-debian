@@ -1,0 +1,35 @@
+###############################################################
+# DOCKER IMAGE - Debian based Nodejs Application (Express.js) #
+###############################################################
+
+FROM node:20-bookworm-slim
+
+# Set the working directory within the container
+WORKDIR /app
+
+# Copy both package.json and package-lock.json
+COPY package*.json ./
+
+# Installing application dependencies (but not dev dependencies)
+RUN npm ci --omit=dev
+
+# Copy the application code into the container
+COPY . /app
+
+# Create the "limitedaccessgroup" group
+RUN groupadd limitedaccessgroup
+
+# Create a non-root user named "limitedaccessaccount" with a specific user ID (e.g., 1050)
+RUN adduser --disabled-password --gecos '' --uid 1050 limitedaccessaccount
+
+# Add the "limitedaccessaccount" to the "limitedaccessgroup" group
+RUN usermod -a -G limitedaccessgroup limitedaccessaccount
+
+# Set non root user
+USER 1050
+
+# Expose the port that the Express.js application will run on (default is 3000)
+EXPOSE 3000
+
+# Define the entrypoint to start the Express.js application
+ENTRYPOINT ["node", "app.js"]
