@@ -1,0 +1,40 @@
+# Ignore Maven build directory
+target/
+
+# Ignore Maven configuration and local repository
+.m2/
+
+# Ignore IDE configuration directories
+.idea/
+*.iml
+*.cache
+*.vscode/
+*.vs/
+
+# Ignore log files
+*.log
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Ignore git directory and files
+.git/
+
+# Ignore other unnecessary files
+README.md
+LICENSE
+.dockerignore
+Dockerfile
+charts/
+azure-pipelines.yml
+docker-compose.yaml
