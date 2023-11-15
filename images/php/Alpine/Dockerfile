@@ -1,4 +1,4 @@
-# Use an Alpine-based PHP 8 image with FPM
+# Use Alpine-based PHP with FPM
 FROM php:8.0-fpm-alpine
 
 # Install Apache and other necessary packages
@@ -6,40 +6,52 @@ RUN apk update && apk add --no-cache \
     apache2 \
     apache2-proxy \
     supervisor \
+    php8-fpm \
     && rm -rf /var/cache/apk/*
 
-# Create a non-root user and group
+
+# Copy over the Apache configuration
+COPY apache.conf /etc/apache2/httpd.conf
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Create a new user and group to run the processes
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Copy Apache, PHP-FPM and Supervisord configuration files
-COPY apache.conf /etc/apache2/httpd.conf
-COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN chown -R appuser:appgroup /var/www/html \
+    && chown -R appuser:appgroup /var/log/apache2 \
+    && chown -R appuser:appgroup /usr/local/etc/php-fpm.d \
+    && chmod 755 /usr/local/etc/php-fpm.d \
+    && chown -R appuser:appgroup /etc/apache2 \
+    && chmod 755 -R /etc/apache2
 
-# Adjust PHP configuration for logging and other settings
-RUN echo "log_errors = On" >> /usr/local/etc/php/php.ini \
-    && echo "error_log = /proc/self/fd/2" >> /usr/local/etc/php/php.ini
-
-# Create necessary directories and set permissions
-RUN mkdir -p /var/www/html \
-    && mkdir -p /run/apache2 \
-    && mkdir -p /var/log/supervisor \
-    && chown -R appuser:appgroup /var/www /run/apache2 /var/log
-
-# Install Composer globally
-RUN apk add --no-cache composer
-
-# Copy application source
-COPY --chown=appuser:appgroup . /var/www/html
-
-# Set the working directory to the application directory
+# Copy the PHP application
+COPY . /var/www/html
 WORKDIR /var/www/html
 
-# Expose port 80
-EXPOSE 80
+# Install PHP dependencies
+RUN composer install
+
+RUN mkdir -p /var/log/php-fpm \
+    && chown -R appuser:appgroup /var/log/php-fpm
+
+RUN mkdir -p /run/php-fpm8 \
+    && touch /run/php-fpm8/php-fpm.pid \
+    && chown -R www-data:www-data /run/php-fpm8 \
+    && chmod 777 /run/php-fpm8/php-fpm.pid
+
+RUN chown -R www-data:www-data /run/apache2 \
+    && chmod 777 -R /run/apache2/
+
+# Copy the supervisord configuration file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Switch to the non-root user
 USER appuser
 
-# Start Supervisord
+# Expose the port Apache is listening on
+EXPOSE 80
+
+# Start Apache and PHP-FPM using supervisord
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
