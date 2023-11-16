@@ -9,7 +9,6 @@ RUN apk update && apk add --no-cache \
     php8-fpm \
     && rm -rf /var/cache/apk/*
 
-
 # Copy over the Apache configuration
 COPY apache.conf /etc/apache2/httpd.conf
 
@@ -20,9 +19,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 RUN chown -R appuser:appgroup /var/www/html \
-    && chown -R appuser:appgroup /var/log/apache2 \
-    && chown -R appuser:appgroup /usr/local/etc/php-fpm.d \
-    && chmod 755 /usr/local/etc/php-fpm.d \
     && chown -R appuser:appgroup /etc/apache2 \
     && chmod 755 -R /etc/apache2
 
@@ -32,14 +28,6 @@ WORKDIR /var/www/html
 
 # Install PHP dependencies
 RUN composer install
-
-RUN mkdir -p /var/log/php-fpm \
-    && chown -R appuser:appgroup /var/log/php-fpm
-
-RUN mkdir -p /run/php-fpm8 \
-    && touch /run/php-fpm8/php-fpm.pid \
-    && chown -R www-data:www-data /run/php-fpm8 \
-    && chmod 777 /run/php-fpm8/php-fpm.pid
 
 RUN chown -R www-data:www-data /run/apache2 \
     && chmod 777 -R /run/apache2/
