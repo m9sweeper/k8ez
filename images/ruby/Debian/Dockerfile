@@ -18,6 +18,11 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
         nginx \
     && rm -rf /var/lib/apt/lists/*
 
+# Set environment variable for installation path
+ENV APP_NAME=hello-rails
+ARG INSTALL_PATH=/opt/$APP_NAME
+ENV INSTALL_PATH $INSTALL_PATH
+
 # Create necessary directories
 RUN mkdir -p /gems /run/nginx /var/log/nginx
 
@@ -27,15 +32,12 @@ WORKDIR /gems
 # Copy Gemfile + Gemfile.lock
 RUN gem install bundler -v 2.2.22
 
-COPY Gemfile .
-COPY Gemfile.lock .
+COPY ../code/$APP_NAME/Gemfile .
+COPY ../code/$APP_NAME/Gemfile.lock .
 
 # Preinstall gems. This will ensure that Gem Cache won't drop on code change
 RUN (bundle check || bundle install)
 
-# Set environment variable for installation path
-ARG INSTALL_PATH=/opt/hello-rails
-ENV INSTALL_PATH $INSTALL_PATH
 
 # Create app directory
 WORKDIR $INSTALL_PATH
@@ -46,17 +48,17 @@ RUN groupadd appuser && useradd -g appuser -m appuser \
     && chown appuser:appuser $INSTALL_PATH
 
 # Copy the app's code into the container
-COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser ../code/$APP_NAME/ .
 
 # Create the log directory and give appuser ownership
 RUN mkdir -p /var/log/supervisor \
     && chown -R appuser:appuser /var/log/supervisor /var/log/nginx /var/lib/nginx /run/
 
 # Copy the supervisord.conf file into the container
-COPY --chown=appuser:appuser supervisord.conf /etc/supervisord.conf
+COPY --chown=appuser:appuser ../Debian/supervisord.conf /etc/supervisord.conf
 
 # Copy the Nginx configuration file into the container
-COPY --chown=appuser:appuser nginx.conf /etc/nginx/nginx.conf
+COPY --chown=appuser:appuser ../Debian/nginx.conf /etc/nginx/nginx.conf
 
 # Create scripts directory and start_rails.sh, make it executable
 RUN mkdir -p $INSTALL_PATH/scripts \
