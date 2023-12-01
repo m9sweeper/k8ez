@@ -5,7 +5,7 @@ FROM maven:3.9.4-amazoncorretto-17-debian AS build
 WORKDIR /app
 
 # Copy the pom.xml file
-COPY pom.xml .
+COPY ../code/pom.xml .
 
 # Build all the dependencies in preparation to go offline.
 # This is a separate step so the dependencies will be cached unless
@@ -13,13 +13,13 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 # Copy the project source
-COPY . .
+COPY ../code/ .
 
 # Package the application
 RUN mvn package -DskipTests
 
 # ---- Run Stage ----
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:17-jre
 
 # Create a group and a non root user
 RUN groupadd -r limitedaccessuser && useradd -r -g limitedaccessuser limitedaccessuser

@@ -1,15 +1,15 @@
 # ---- Build Stage ----
-FROM maven:3.9.4-eclipse-temurin-21-alpine AS build
+FROM maven:3.9.4-eclipse-temurin-17-alpine AS build
 
 # Set the current working directory inside the image
 WORKDIR /app
 
 # Copy maven executable to the image
-COPY mvnw .
-COPY .mvn .mvn
+COPY ../code/mvnw .
+COPY ../code/.mvn .mvn
 
 # Copy the pom.xml file
-COPY pom.xml .
+COPY ../code/pom.xml .
 
 # Build all the dependencies in preparation to go offline.
 # This is a separate step so the dependencies will be cached unless
@@ -17,23 +17,21 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 # Copy the project source
-COPY . .
+COPY ../code/ .
 
 # Package the application
 RUN mvn package -DskipTests
 
 
 # ---- Run Stage ----
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 # Create the "limitedaccessgroup" group
-RUN groupadd limitedaccessgroup
+RUN addgroup limitedaccessgroup
 
 # Create a non-root user named "limitedaccessaccount" with a specific user ID (e.g., 1050)
-RUN adduser --disabled-password --gecos '' --uid 1050 limitedaccessaccount
-
-# Add the "limitedaccessaccount" to the "limitedaccessgroup" group
-RUN usermod -a -G limitedaccessgroup limitedaccessaccount
+# and add it to the "limitedaccessgroup" group
+RUN adduser -D -G limitedaccessgroup -u 1050 limitedaccessaccount
 
 # Specify the work directory and set permissions
 WORKDIR /app
@@ -42,8 +40,8 @@ RUN chown limitedaccessaccount:limitedaccessgroup /app
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Set non root user
-USER 1050
+# Set non-root user
+USER limitedaccessaccount
 
 # Expose the port that the Spring Boot application will run on (default is 8080)
 EXPOSE 8080
