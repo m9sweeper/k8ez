@@ -28,7 +28,7 @@ COPY --from=build-stage /app/dist/code/browser /usr/share/nginx/html
 # Custom Nginx configuration
 COPY ../Alpine/nginx.conf /etc/nginx/nginx.conf
 
-# Create a group and user
+# Create a non root group and user
 RUN addgroup -S nginxgroup && adduser -S nginxuser -G nginxgroup
 
 # Change ownership for the app directory
