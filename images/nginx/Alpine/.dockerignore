@@ -1,0 +1,67 @@
+# Node modules
+node_modules
+
+# Build outputs
+/build
+/dist
+
+# Logs
+logs
+*.log
+
+# Directory for editor configurations
+.idea
+.vscode
+
+# Environment files
+.env*
+!.env.example
+
+# Source control
+.git
+.gitignore
+
+# System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# MacOS specific
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+Icon?
+.DocumentRevisions-V100
+
+# Windows specific
+$RECYCLE.BIN/
+*.cab
+*.exe
+*.dll
+*.msi
+*Windows.*
+*Program Files*
+*Boot*
+*System32*
+
+# Linux specific
+.*.swp
+.*.swo
+*~
+lost+found/
+.cache
+.config
+
+# Dependency directories
+bower_components
+jspm_packages
+
+# Misc
+*.sublime*
+*.swp
+*.swo
+*~
+*.lock
