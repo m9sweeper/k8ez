@@ -22,7 +22,8 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
 ENV APP_NAME=hello-rails
 ARG INSTALL_PATH=/opt/$APP_NAME
 ENV INSTALL_PATH $INSTALL_PATH
-#ENV RAILS_ENV=production
+ENV RAILS_ENV=production
+ENV RAILS_LOG_TO_STDOUT=true
 
 
 # Create necessary directories
