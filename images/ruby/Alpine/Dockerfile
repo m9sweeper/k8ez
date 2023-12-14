@@ -28,6 +28,7 @@ RUN apk add --update --no-cache \
 ARG APP_NAME=hello-rails
 ARG INSTALL_PATH=/opt/$APP_NAME
 ENV INSTALL_PATH $INSTALL_PATH
+ENV RAILS_ENV=production
 
 # Create necessary directories
 RUN mkdir -p /gems /run/nginx /var/log/nginx

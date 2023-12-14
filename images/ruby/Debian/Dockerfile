@@ -1,5 +1,5 @@
 # Use the official Ruby image based on Debian
-FROM ruby:3.2.1
+FROM ruby:3.2.2
 
 # Install dependencies including Nginx
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
@@ -22,6 +22,8 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
 ENV APP_NAME=hello-rails
 ARG INSTALL_PATH=/opt/$APP_NAME
 ENV INSTALL_PATH $INSTALL_PATH
+#ENV RAILS_ENV=production
+
 
 # Create necessary directories
 RUN mkdir -p /gems /run/nginx /var/log/nginx
@@ -37,6 +39,10 @@ COPY ../code/$APP_NAME/Gemfile.lock .
 
 # Preinstall gems. This will ensure that Gem Cache won't drop on code change
 RUN (bundle check || bundle install)
+
+RUN rails yarn:install && \
+    rails assets:clobber && \
+    rails assets:precompile
 
 
 # Create app directory
