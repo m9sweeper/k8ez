@@ -106,11 +106,13 @@ LOGGING = {
     'loggers': {
         '': {  # 'root' logger
             'handlers': ['console'],
+            'filters': [],
             'level': 'INFO',
             'propagate': True,
         },
-        'my_app.views': {  # Django's default logger
+        'django': {  # Django's default logger
             'handlers': ['console'],
+            'filters': [],
             'level': 'INFO',
             'propagate': True,
         },
