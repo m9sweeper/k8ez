@@ -1,6 +1,12 @@
 # Use the official Ruby image based on Alpine
 FROM ruby:3.2.1-alpine
 
+# label our docker file
+LABEL repo='git.ascendlearning.com' \
+      company='Intelletive' \
+      team='Intelletive' \
+      maintainer='mahmud.tarique@intelletive.com'
+
 # Install dependencies including Nginx
 RUN apk add --update --no-cache \
         build-base \
@@ -30,13 +36,17 @@ RUN mkdir -p /gems /run/nginx /var/log/nginx
 WORKDIR /gems
 
 # Copy Gemfile + Gemfile.lock
-RUN gem install bundler -v 2.2.22
+RUN gem install bundler
 
 COPY ../code/$APP_NAME/Gemfile .
 COPY ../code/$APP_NAME/Gemfile.lock .
 
 # Preinstall gems. This will ensure that Gem Cache won't drop on code change
 RUN (bundle check || bundle install)
+
+RUN bundle exec rake yarn:install && \
+    bundle exec rake assets:clobber && \
+    bundle exec rake assets:precompile
 
 # Create app directory
 WORKDIR $INSTALL_PATH
