@@ -25,6 +25,8 @@ RUN mkdir -p /home/appuser/supervisor && chown -R appuser:appuser /home/appuser/
 # Install Python dependencies
 COPY ../code/myproject/requirements.txt .
 
+RUN pip install --upgrade pip
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Collect static files
