@@ -59,14 +59,9 @@ COPY --chown=appuser:appuser ../Alpine/supervisord.conf /etc/supervisord.conf
 # Copy the Nginx configuration file into the container
 COPY --chown=appuser:appuser ../Alpine/nginx.conf /etc/nginx/nginx.conf
 
-# Create scripts directory and start_rails.sh, make it executable
-RUN mkdir -p $INSTALL_PATH/scripts \
-    && echo '#! /bin/sh' > $INSTALL_PATH/scripts/start_rails.sh \
-    && echo 'bundle exec rails db:migrate' >> $INSTALL_PATH/scripts/start_rails.sh \
-    && echo 'bundle exec rails db:seed' >> $INSTALL_PATH/scripts/start_rails.sh \
-    && echo 'bundle exec rails s -b 0.0.0.0' >> $INSTALL_PATH/scripts/start_rails.sh \
-    && chmod +x $INSTALL_PATH/scripts/start_rails.sh \
-    && chown -R appuser:appuser $INSTALL_PATH/scripts
+# Make start_rails.sh executable
+RUN chmod +x $INSTALL_PATH/start_rails.sh
+RUN chown -R appuser:appuser $INSTALL_PATH/start_rails.sh
 
 # Change to the non-root user
 USER appuser
