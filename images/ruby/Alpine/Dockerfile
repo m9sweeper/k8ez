@@ -22,6 +22,8 @@ RUN apk add --update --no-cache \
         nodejs \
         yarn \
         nginx \
+        build-base \
+        sqlite-dev \
     && rm -rf /var/cache/apk/*
 
 # Set environment variable for installation path
@@ -45,37 +47,37 @@ COPY ../code/$APP_NAME/Gemfile.lock .
 # Preinstall gems. This will ensure that Gem Cache won't drop on code change
 RUN (bundle check || bundle install)
 
-RUN bundle exec rake yarn:install && \
-    bundle exec rake assets:clobber && \
-    bundle exec rake assets:precompile
+RUN bundle exec rails yarn:install && \
+    bundle exec rails assets:clobber && \
+    bundle exec rails assets:precompile
 
 # Create app directory
 WORKDIR $INSTALL_PATH
 
-# Create a non-root user 'appuser' and switch to it
-RUN addgroup -S appuser && adduser -S appuser -G appuser \
+# Create a non-root user with a specific UID and switch to it
+RUN addgroup -S appgroup && adduser -S -u 1001 -G appgroup appuser \
     && mkdir -p $INSTALL_PATH \
-    && chown appuser:appuser $INSTALL_PATH
+    && chown 1001:appgroup $INSTALL_PATH
 
 # Copy the app's code into the container
-COPY --chown=appuser:appuser ../code/$APP_NAME/ .
+COPY --chown=1001:appgroup ../code/$APP_NAME/ .
 
 # Create the log directory and give appuser ownership
 RUN mkdir -p /var/log/supervisor \
-    && chown -R appuser:appuser /var/log/supervisor /var/log/nginx /var/lib/nginx /run/
+    && chown -R 1001:appgroup /var/log/supervisor /var/log/nginx /var/lib/nginx /run/
 
 # Copy the supervisord.conf file into the container
-COPY --chown=appuser:appuser ../Alpine/supervisord.conf /etc/supervisord.conf
+COPY --chown=1001:appgroup ../Alpine/supervisord.conf /etc/supervisord.conf
 
 # Copy the Nginx configuration file into the container
-COPY --chown=appuser:appuser ../Alpine/nginx.conf /etc/nginx/nginx.conf
+COPY --chown=1001:appgroup ../Alpine/nginx.conf /etc/nginx/nginx.conf
 
 # Make start_rails.sh executable
 RUN chmod +x $INSTALL_PATH/start_rails.sh
-RUN chown -R appuser:appuser $INSTALL_PATH/start_rails.sh
+RUN chown -R 1001:appgroup $INSTALL_PATH/start_rails.sh
 
 # Change to the non-root user
-USER appuser
+USER 1001
 
 # Expose the port Nginx is running on
 EXPOSE 80

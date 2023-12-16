@@ -1,5 +1,5 @@
 # Use the official Ruby image based on Debian
-FROM ruby:3.2.2
+FROM ruby:3.2.1
 
 # Install dependencies including Nginx
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
@@ -25,7 +25,6 @@ ENV INSTALL_PATH $INSTALL_PATH
 ENV RAILS_ENV=production
 ENV RAILS_LOG_TO_STDOUT=true
 
-
 # Create necessary directories
 RUN mkdir -p /gems /run/nginx /var/log/nginx
 
@@ -33,7 +32,7 @@ RUN mkdir -p /gems /run/nginx /var/log/nginx
 WORKDIR /gems
 
 # Copy Gemfile + Gemfile.lock
-RUN gem install bundler -v 2.2.22
+RUN gem install bundler
 
 COPY ../code/$APP_NAME/Gemfile .
 COPY ../code/$APP_NAME/Gemfile.lock .
@@ -45,34 +44,33 @@ RUN rails yarn:install && \
     rails assets:clobber && \
     rails assets:precompile
 
-
 # Create app directory
 WORKDIR $INSTALL_PATH
 
-# Create a non-root user 'appuser' and switch to it
-RUN groupadd appuser && useradd -g appuser -m appuser \
+# Create a non-root user 'appuser' with UID 1001 and switch to it
+RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -m appuser \
     && mkdir -p $INSTALL_PATH \
-    && chown appuser:appuser $INSTALL_PATH
+    && chown 1001:appuser $INSTALL_PATH
 
 # Copy the app's code into the container
-COPY --chown=appuser:appuser ../code/$APP_NAME/ .
+COPY --chown=1001:appuser ../code/$APP_NAME/ .
 
 # Create the log directory and give appuser ownership
 RUN mkdir -p /var/log/supervisor \
-    && chown -R appuser:appuser /var/log/supervisor /var/log/nginx /var/lib/nginx /run/
+    && chown -R 1001:appuser /var/log/supervisor /var/log/nginx /var/lib/nginx /run/
 
 # Copy the supervisord.conf file into the container
-COPY --chown=appuser:appuser ../Debian/supervisord.conf /etc/supervisord.conf
+COPY --chown=1001:appuser ../Debian/supervisord.conf /etc/supervisord.conf
 
 # Copy the Nginx configuration file into the container
-COPY --chown=appuser:appuser ../Debian/nginx.conf /etc/nginx/nginx.conf
+COPY --chown=1001:appuser ../Debian/nginx.conf /etc/nginx/nginx.conf
 
 # Make start_rails.sh executable
 RUN chmod +x $INSTALL_PATH/start_rails.sh
-RUN chown -R appuser:appuser $INSTALL_PATH/start_rails.sh
+RUN chown -R 1001:appuser $INSTALL_PATH/start_rails.sh
 
 # Change to the non-root user
-USER appuser
+USER 1001
 
 # Expose the port Nginx is running on
 EXPOSE 80
