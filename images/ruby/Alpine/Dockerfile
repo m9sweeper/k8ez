@@ -1,12 +1,6 @@
 # Use the official Ruby image based on Alpine
 FROM ruby:3.2.1-alpine
 
-# label our docker file
-LABEL repo='git.ascendlearning.com' \
-      company='Intelletive' \
-      team='Intelletive' \
-      maintainer='mahmud.tarique@intelletive.com'
-
 # Install dependencies including Nginx
 RUN apk add --update --no-cache \
         build-base \
@@ -31,6 +25,7 @@ ARG APP_NAME=hello-rails
 ARG INSTALL_PATH=/opt/$APP_NAME
 ENV INSTALL_PATH $INSTALL_PATH
 ENV RAILS_ENV=production
+ENV RAILS_LOG_TO_STDOUT=true
 
 # Create necessary directories
 RUN mkdir -p /gems /run/nginx /var/log/nginx
