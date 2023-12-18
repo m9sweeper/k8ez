@@ -32,7 +32,6 @@ RUN addgroup -S limitedaccessuser && adduser -S -u 1001 -G limitedaccessuser -h 
 # Set an environment variable for the application name
 ENV APP_NAME=code
 
-
 COPY ../code/bin/Debug/net8.0/$APP_NAME.dll app/
 
 # Copy the published application into the image
