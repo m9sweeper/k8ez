@@ -3,5 +3,5 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "articles#index"
-  get '/hello' => 'hello_world#index'
+  root "hello_world#index"
 end
