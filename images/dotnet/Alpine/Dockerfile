@@ -27,7 +27,6 @@ FROM base AS final
 WORKDIR /app
 
 # Create a group and a non-root user with a specific UID for security
-# Make sure these lines are identical to the ones in the previous stage where the user was initially created
 RUN addgroup -S limitedaccessuser && adduser -S -u 1001 -G limitedaccessuser -h /app -s /bin/sh limitedaccessuser
 
 # Set an environment variable for the application name
