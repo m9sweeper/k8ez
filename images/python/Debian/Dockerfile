@@ -1,6 +1,12 @@
 # Use a Debian-based Python image
 FROM python:3.9-slim
 
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
+
 # Create and set the working directory
 WORKDIR /var/www/myproject
 
@@ -19,8 +25,8 @@ RUN groupadd -r appuser && useradd -r -g appuser -m -d /home/appuser appuser
 # Change ownership of directories to the non-root user
 RUN chown -R appuser:appuser /var/www/myproject /var/log/apache2 /var/run/apache2 /var/run /var/lib/apache2 /var/log/supervisor /home/appuser
 
-# Create a directory for the Supervisor PID file
-RUN mkdir -p /home/appuser/supervisor && chown -R appuser:appuser /home/appuser/supervisor
+# Create a non-root user and group with a specific UID
+RUN groupadd -r appuser && useradd -r -g appuser -u 1001 -m -d /home/appuser appuser
 
 # Install Python dependencies
 COPY ../code/myproject/requirements.txt .
@@ -36,8 +42,8 @@ RUN python manage.py collectstatic --noinput
 COPY ../Debian/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/
 
-# Switch to non-root user
-USER appuser
+# Switch to non-root user by UID
+USER 1001
 
 # Expose the port Apache is listening on
 EXPOSE 8080
