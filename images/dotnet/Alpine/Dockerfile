@@ -6,7 +6,7 @@ EXPOSE 8080
 # Use the SDK image (Alpine) to build the app
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
-RUN apk add --no-cache bash
+RUN apk add --no-cache
 
 # Set an environment variable for the application name
 ENV APP_NAME=code
