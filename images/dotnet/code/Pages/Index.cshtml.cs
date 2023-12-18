@@ -10,6 +10,7 @@ public class IndexModel : PageModel
     public IndexModel(ILogger<IndexModel> logger)
     {
         _logger = logger;
+        Console.WriteLine("Hello world!!");
     }
 
     public void OnGet()
