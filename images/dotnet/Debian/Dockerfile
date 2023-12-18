@@ -11,11 +11,11 @@ WORKDIR /src
 ENV APP_NAME=code
 
 # Copy csproj and restore as distinct layers
-COPY ../code/*.csproj ./
+COPY ./code/*.csproj ./
 RUN dotnet restore
 
 # Copy everything else and build
-COPY ../code/ .
+COPY ./code/ .
 RUN dotnet build -c Release -o /app/build
 
 FROM build AS publish
@@ -24,18 +24,14 @@ RUN dotnet publish -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 
-# Create a group and a non root user
-RUN groupadd -r limitedaccessuser && useradd -r -g limitedaccessuser -d /app -s /sbin/nologin limitedaccessuser
+# Create a group and a non-root user with a specific UID
+RUN groupadd -r limitedaccessuser && \
+    useradd -r -g limitedaccessuser -u 1001 -d /app -s /sbin/nologin limitedaccessuser
 
 # Set an environment variable for the application name
 ENV APP_NAME=code
 
-# Copy the entrypoint script and make it executable
-COPY ../Debian/entrypoint.sh /app/entrypoint.sh
-
-COPY ../code/bin/Debug/net8.0/$APP_NAME.dll app/
-
-RUN chmod +x /app/entrypoint.sh
+COPY ./code/bin/Debug/net8.0/$APP_NAME.dll app/
 
 # Copy the published application into the image
 COPY --from=publish /app/publish .
@@ -43,8 +39,8 @@ COPY --from=publish /app/publish .
 # Change the ownership of the application files to the new user and group
 RUN chown -R limitedaccessuser:limitedaccessuser /app
 
-# Switch to the non root user
-USER limitedaccessuser
+# Switch to the non-root user by UID
+USER 1001
 
-# Use the entrypoint script as the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Use dotnet command as the entrypoint
+ENTRYPOINT dotnet ${APP_NAME}.dll
