@@ -9,26 +9,27 @@ RUN apt-get update && \
 
 # Configure Nginx
 RUN rm -rf /var/www/html/*
-COPY --chown=www-data:www-data index.php /var/www/html/index.php
+COPY --chown=www-data:www-data ../code/index.php /var/www/html/index.php
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-COPY --chown=www-data:www-data nginx.conf /etc/nginx/sites-available/default
+COPY --chown=www-data:www-data ../Debian/nginx.conf /etc/nginx/sites-available/default
 
 # Configure Supervisord
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Add a non-root user
-RUN useradd -m limitedaccessuser
+# Add a non-root user with specific UID (e.g., 1001)
+RUN useradd -m -u 1001 limitedaccessuser
 RUN chown -R limitedaccessuser:limitedaccessuser /var/www /var/log/nginx /var/lib/nginx /run
 
-# Create the supervisor log directory and set permissions
-RUN mkdir -p /var/log/supervisor && \
-    chown -R limitedaccessuser:limitedaccessuser /var/log/supervisor
+# Redirect Nginx logs to stdout and stderr
+#RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+#    ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Change to non-root user
-USER limitedaccessuser
+# Change to non-root user with specific UID
+USER 1001
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080
+EXPOSE 8080
 
 # Start Supervisord
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
