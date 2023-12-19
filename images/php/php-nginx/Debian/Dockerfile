@@ -20,10 +20,6 @@ COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN useradd -m -u 1001 limitedaccessuser
 RUN chown -R limitedaccessuser:limitedaccessuser /var/www /var/log/nginx /var/lib/nginx /run
 
-# Redirect Nginx logs to stdout and stderr
-#RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
-#    ln -sf /dev/stderr /var/log/nginx/error.log
-
 # Change to non-root user with specific UID
 USER 1001
 
@@ -32,4 +28,3 @@ EXPOSE 8080
 
 # Start Supervisord
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
