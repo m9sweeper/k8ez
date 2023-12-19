@@ -15,8 +15,8 @@ COPY ../Alpine/apache.conf /etc/apache2/httpd.conf
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create a new user and group to run the processes
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Create a new user and group to run the processes with a specific UID
+RUN addgroup -S appgroup && adduser -S -u 1000 -G appgroup appuser
 
 RUN chown -R appuser:appgroup /var/www/html \
     && chown -R appuser:appgroup /etc/apache2 \
@@ -40,7 +40,7 @@ RUN chown -R appuser:appgroup /run/apache2 \
 COPY ../Alpine/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Switch to the non-root user
-USER appuser
+USER 1000
 
 # Expose the port Apache is listening on
 EXPOSE 8080

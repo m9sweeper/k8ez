@@ -39,7 +39,7 @@ RUN composer install --no-dev --no-scripts --no-plugins
 COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Run as non-root user
-USER appuser
+USER 1000
 
 # Expose the port Apache is listening on
 EXPOSE 8080
