@@ -6,6 +6,7 @@
 <body>
     <?php
         echo "Hello World!";
+        error_log("Test Error");
     ?>
 </body>
 </html>
