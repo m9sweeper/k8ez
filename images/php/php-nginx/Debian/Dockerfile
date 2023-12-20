@@ -9,16 +9,24 @@ RUN apt-get update && \
 
 # Configure Nginx
 RUN rm -rf /var/www/html/*
-COPY --chown=www-data:www-data ../code/index.php /var/www/html/index.php
+
+# Add a non-root user with specific UID
+RUN addgroup --gid 1001 appgroup && \
+    useradd -m -u 1001 -g appgroup appuser
+
+COPY --chown=appuser:appgroup ../code/ /var/www/html
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-COPY --chown=www-data:www-data ../Debian/nginx.conf /etc/nginx/sites-available/default
+COPY --chown=appuser:appgroup ../Debian/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Configure Supervisord
 COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Add a non-root user with specific UID (e.g., 1001)
-RUN useradd -m -u 1001 limitedaccessuser
-RUN chown -R limitedaccessuser:limitedaccessuser /var/www /var/log/nginx /var/lib/nginx /run
+
+RUN chown -R appuser:appgroup /var /run
+
+# Redirect Nginx logs to stdout and stderr
+RUN ln -sf  /var/www/html/app_logs/access.log /dev/stdout && \
+    ln -sf  /var/www/html/app_logs/errors.log /dev/stderr
 
 # Change to non-root user with specific UID
 USER 1001

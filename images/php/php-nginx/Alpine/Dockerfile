@@ -14,7 +14,7 @@ COPY --chown=appuser:appgroup ../code /var/www/html
 
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
-COPY ../Alpine/default.conf /etc/nginx/http.d/default.conf
+COPY ../Alpine/nginx.conf /etc/nginx/http.d/default.conf
 
 # Configure Supervisord
 COPY ../Alpine/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
