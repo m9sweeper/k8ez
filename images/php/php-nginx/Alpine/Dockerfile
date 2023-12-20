@@ -10,11 +10,11 @@ RUN rm -rf /var/www/html/*
 # Create a new non root user and group with specific UID/
 RUN addgroup -g 1001 appgroup && \
     adduser -D -u 1001 -G appgroup appuser
-COPY --chown=appuser:appgroup ../code/index.php /var/www/html/index.php
+COPY --chown=appuser:appgroup ../code /var/www/html
 
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
-COPY --chown=appuser:appgroup ../Alpine/nginx.conf /etc/nginx/http.d/default.conf
+COPY ../Alpine/default.conf /etc/nginx/http.d/default.conf
 
 # Configure Supervisord
 COPY ../Alpine/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -28,8 +28,8 @@ RUN mkdir -p /var/lib/nginx/tmp /var/lib/nginx/tmp/client_body && \
     chown -R appuser:appgroup /var/lib/nginx /run
 
 # Redirect Nginx logs to stdout and stderr
-RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
-    ln -sf /dev/stderr /var/log/nginx/error.log
+RUN ln -sf  /var/www/html/app_logs/access.log /dev/stdout && \
+    ln -sf  /var/www/html/app_logs/errors.log /dev/stderr
 
 # Set the working directory
 WORKDIR /var/www/html
