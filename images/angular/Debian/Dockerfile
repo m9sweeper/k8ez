@@ -26,13 +26,17 @@ RUN apt-get update && \
     rm -rf /etc/nginx/conf.d/default.conf && \
     rm -rf /usr/share/nginx/html/*
 
-# Create a group and user
-RUN groupadd -r nginxgroup && \
-    useradd -r -g nginxgroup nginxuser
+# Specify a UID and GID
+ARG UID=1001
+ARG GID=1001
+
+# Create a group and user with the specified UID and GID
+RUN groupadd -r -g ${GID} nginxgroup && \
+    useradd -r -u ${UID} -g nginxgroup nginxuser
 
 # Create required directories and set permissions for Nginx
-RUN mkdir -p /var/lib/nginx/body /var/lib/nginx/proxy /var/lib/nginx/fastcgi /var/lib/nginx/uwsgi /var/lib/nginx/scgi /var/log/nginx /var/cache/nginx && \
-    chown -R nginxuser:nginxgroup /var/lib/nginx /var/log/nginx /var/cache/nginx
+RUN mkdir -p /var/lib/nginx/body /var/lib/nginx/proxy /var/lib/nginx/fastcgi /var/lib/nginx/uwsgi /var/lib/nginx/scgi /var/cache/nginx && \
+    chown -R nginxuser:nginxgroup /var/lib/nginx /var/cache/nginx
 
 # Copy the compiled build from the previous stage
 COPY --from=build-stage /app/dist/code/browser /usr/share/nginx/html
@@ -47,8 +51,8 @@ RUN chown -R nginxuser:nginxgroup /usr/share/nginx/html
 RUN sed -i 's/^user  nginx;/user  nginxuser nginxgroup;/' /etc/nginx/nginx.conf && \
     sed -i 's/^pid.*/pid \/tmp\/nginx.pid;/' /etc/nginx/nginx.conf
 
-# Switch to the non-root user
-USER nginxuser
+# Switch to the non-root user by UID
+USER ${UID}
 
 # Expose port 80
 EXPOSE 80
