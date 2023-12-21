@@ -43,7 +43,7 @@ RUN mkdir -p /run/apache2 \
     && chown -R appuser:appgroup /run/apache2 \
     && chown -R appuser:appgroup /var/www/
 
-# Give permissions to log files
+# File Permissions
 RUN chown -R appuser:appgroup /var/www/storage /var/www/bootstrap/cache  \
     && chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 

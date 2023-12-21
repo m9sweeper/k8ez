@@ -24,23 +24,27 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Create a non root user to run Composer and Artisan Commands
-RUN groupadd -g 1000 limitedaccessuser \
-    && useradd -u 1000 -ms /bin/bash -g limitedaccessuser limitedaccessuser
+RUN groupadd -g 1000 appgroup \
+    && useradd -u 1000 -ms /bin/bash -g appgroup appuser
 
 # Copy existing application directory permissions
-COPY --chown=limitedaccessuser:limitedaccessuser . /var/www
+COPY --chown=appuser:appgroup . /var/www
 
 # Set working directory
 WORKDIR /var/www
 
 # Copy existing application directory permissions
-COPY --chown=limitedaccessuser:limitedaccessuser . /var/www
+COPY --chown=appuser:appgroup ../code/hello-world /var/www
 
 # Copy Apache vhost file to proxy php requests to php-fpm service
-COPY vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY ../Debian/apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Copy supervisor configuration file
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Permissions
+RUN chown -R appuser:appgroup /var/www/storage /var/www/bootstrap/cache  \
+    && chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
 # Enable Apache mods
 RUN a2enmod proxy_fcgi
@@ -48,9 +52,6 @@ RUN a2enmod rewrite
 
 # Expose port 80
 EXPOSE 80
-
-# Switch to non root user
-USER limitedaccessuser
 
 # Start supervisord
 CMD ["/usr/bin/supervisord"]
