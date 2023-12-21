@@ -28,7 +28,7 @@ RUN groupadd -g 1000 appgroup \
     && useradd -u 1000 -ms /bin/bash -g appgroup appuser
 
 # Copy existing application directory permissions
-COPY --chown=appuser:appgroup . /var/www
+COPY --chown=appuser:appgroup ../code/hello-world /var/www
 
 # Set working directory
 WORKDIR /var/www
