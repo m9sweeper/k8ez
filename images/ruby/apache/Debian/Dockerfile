@@ -79,7 +79,7 @@ RUN a2ensite apache
 USER 1001
 
 # Expose the port Nginx is running on
-EXPOSE 80
+EXPOSE 8080
 
 # Set the default command to run supervisord as non-root user
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

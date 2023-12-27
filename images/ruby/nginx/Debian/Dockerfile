@@ -48,31 +48,31 @@ RUN rails yarn:install && \
 WORKDIR $INSTALL_PATH
 
 # Create a non-root user 'appuser' with UID 1001 and switch to it
-RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -m appuser \
+RUN groupadd -g 1001 appgroup && useradd -u 1001 -g appgroup -m appuser \
     && mkdir -p $INSTALL_PATH \
-    && chown 1001:appuser $INSTALL_PATH
+    && chown appuser:appgroup $INSTALL_PATH
 
 # Copy the app's code into the container
-COPY --chown=1001:appuser ../code/$APP_NAME/ .
+COPY --chown=appuser:appgroup ../code/$APP_NAME/ .
 
 # Create the log directory and give appuser ownership
-RUN chown -R 1001:appuser /var/lib/nginx /run/
+RUN chown -R appuser:appgroup /var/lib/nginx /run/
 
 # Copy the supervisord.conf file into the container
-COPY --chown=1001:appuser ../nginx/Debian/supervisord.conf /etc/supervisord.conf
+COPY --chown=appuser:appgroup ../nginx/Debian/supervisord.conf /etc/supervisord.conf
 
 # Copy the Nginx configuration file into the container
-COPY --chown=1001:appuser ../nginx/Debian/nginx.conf /etc/nginx/nginx.conf
+COPY --chown=appuser:appgroup ../nginx/Debian/nginx.conf /etc/nginx/nginx.conf
 
 # Make start_rails.sh executable
 RUN chmod +x $INSTALL_PATH/start_rails.sh
-RUN chown -R 1001:appuser $INSTALL_PATH/start_rails.sh
+RUN chown -R appuser:appgroup $INSTALL_PATH/start_rails.sh
 
 # Change to the non-root user
 USER 1001
 
 # Expose the port Nginx is running on
-EXPOSE 80
+EXPOSE 8080
 
 # Set the default command to run supervisord as non-root user
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

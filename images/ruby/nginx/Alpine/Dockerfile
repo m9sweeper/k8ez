@@ -55,16 +55,16 @@ RUN addgroup -S appgroup && adduser -S -u 1001 -G appgroup appuser \
     && chown 1001:appgroup $INSTALL_PATH
 
 # Copy the app's code into the container
-COPY --chown=1001:appgroup ../code/$APP_NAME/ .
+COPY --chown=appuser:appgroup ../code/$APP_NAME/ .
 
 # Create the log directory and give appuser ownership
-RUN chown -R 1001:appgroup /var/lib/nginx /run/
+RUN chown -R appuser:appgroup /var/lib/nginx /run/
 
 # Copy the supervisord.conf file into the container
-COPY --chown=1001:appgroup ../nginx/Alpine/supervisord.conf /etc/supervisord.conf
+COPY --chown=appuser:appgroup ../nginx/Alpine/supervisord.conf /etc/supervisord.conf
 
 # Copy the Nginx configuration file into the container
-COPY --chown=1001:appgroup ../nginx/Alpine/nginx.conf /etc/nginx/nginx.conf
+COPY --chown=appuser:appgroup ../nginx/Alpine/nginx.conf /etc/nginx/nginx.conf
 
 # Make start_rails.sh executable
 RUN chmod +x $INSTALL_PATH/start_rails.sh
@@ -74,7 +74,7 @@ RUN chown -R 1001:appgroup $INSTALL_PATH/start_rails.sh
 USER 1001
 
 # Expose the port Nginx is running on
-EXPOSE 80
+EXPOSE 8080
 
 # Set the default command to run supervisord as non-root user
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
