@@ -56,14 +56,13 @@ RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser -m appuser \
 COPY --chown=1001:appuser ../code/$APP_NAME/ .
 
 # Create the log directory and give appuser ownership
-RUN mkdir -p /var/log/supervisor \
-    && chown -R 1001:appuser /var/log/supervisor /var/log/nginx /var/lib/nginx /run/
+RUN chown -R 1001:appuser /var/lib/nginx /run/
 
 # Copy the supervisord.conf file into the container
-COPY --chown=1001:appuser supervisord.conf /etc/supervisord.conf
+COPY --chown=1001:appuser ../nginx/Debian/supervisord.conf /etc/supervisord.conf
 
 # Copy the Nginx configuration file into the container
-COPY --chown=1001:appuser nginx.conf /etc/nginx/nginx.conf
+COPY --chown=1001:appuser ../nginx/Debian/nginx.conf /etc/nginx/nginx.conf
 
 # Make start_rails.sh executable
 RUN chmod +x $INSTALL_PATH/start_rails.sh
