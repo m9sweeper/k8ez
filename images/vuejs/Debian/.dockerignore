@@ -1,0 +1,35 @@
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Files and directories related to version control systems
+.git
+.gitignore
+.gitmodules
+.svn
+.hg
+
+# Node.js package management
+node_modules
+npm-debug.log
+yarn-error.log
+yarn.lock
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Editor directories and files
+.vscode
+*.swp
+*.swo
+*.sublime*
+.idea/
+*.iml
+*.bsp
