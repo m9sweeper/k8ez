@@ -1,0 +1,65 @@
+# Ignore Git and version control
+.git
+.gitignore
+.svn
+.hg
+
+# Ignore IDE and editor files
+.idea
+*.sublime-workspace
+*.sublime-project
+.vscode
+*.swp
+*.swo
+*.bak
+*.bak2
+*.tmp
+
+# Ignore build artifacts and dependency directories
+node_modules
+bower_components
+vendor
+
+# Ignore specific logs and caches
+npm-debug.log
+yarn-error.log
+.cache
+
+# Ignore Docker-related files
+Dockerfile
+.dockerignore
+
+# Ignore testing and documentation
+tests
+docs
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# Ignore specific configuration files
+*.env
+*.yml
+*.yaml
+
+# Ignore other unnecessary files
+*.log
+*.sql
+*.tar.*
+*.zip
+*.gz
+*.rar
+*.7z
+
+# Operating system related files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Ignore OS generated files (Mac)
+._*
+.Spotlight-V100
+.Trashes
+
+# Ignore Windows image file caches
+ehthumbs.db
