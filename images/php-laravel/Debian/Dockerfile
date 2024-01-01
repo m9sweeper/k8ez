@@ -47,6 +47,7 @@ RUN chown -R appuser:appgroup /var/www/storage /var/www/bootstrap/cache  \
     && chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
 RUN sed -i 's|ErrorLog ${APACHE_LOG_DIR}/error.log|ErrorLog stderr|' /etc/apache2/apache2.conf
+RUN sed -i 's|logfile=/var/log/supervisor/supervisord.log|logfile=/dev/stdout|' /etc/supervisor/supervisord.conf
 
 # Enable Apache mods
 RUN a2enmod proxy_fcgi
