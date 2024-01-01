@@ -46,6 +46,8 @@ COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chown -R appuser:appgroup /var/www/storage /var/www/bootstrap/cache  \
     && chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
+RUN sed -i 's|ErrorLog ${APACHE_LOG_DIR}/error.log|ErrorLog stderr|' /etc/apache2/apache2.conf
+
 # Enable Apache mods
 RUN a2enmod proxy_fcgi
 RUN a2enmod rewrite

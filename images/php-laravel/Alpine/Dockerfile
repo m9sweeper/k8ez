@@ -48,15 +48,8 @@ RUN chown -R appuser:appgroup /var/www/storage /var/www/bootstrap/cache  \
     && chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
 # Enable necessary Apache modules
-RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule proxy_module/LoadModule proxy_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule proxy_fcgi_module/LoadModule proxy_fcgi_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule session_module/LoadModule session_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule session_cookie_module/LoadModule session_cookie_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule session_crypto_module/LoadModule session_crypto_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule slotmem_shm_module/LoadModule slotmem_shm_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule socache_shmcb_module/LoadModule socache_shmcb_module/' /etc/apache2/httpd.conf \
-    && sed -i 's/#LoadModule fcgid_module/LoadModule fcgid_module/' /etc/apache2/httpd.conf
+RUN sed -i 's|ErrorLog logs/error.log|ErrorLog stderr|' /etc/apache2/httpd.conf
+RUN sed -i 's|CustomLog logs/access.log combined|CustomLog stdout combined|' /etc/apache2/httpd.conf
 
 # Expose port 80
 EXPOSE 80
