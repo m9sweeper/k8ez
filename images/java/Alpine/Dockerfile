@@ -1,5 +1,5 @@
 # ---- Build Stage ----
-FROM maven:3.9.4-eclipse-temurin-17-alpine AS build
+FROM maven:3.8.8-eclipse-temurin-21-alpine AS build
 
 # Set the current working directory inside the image
 WORKDIR /app
@@ -24,24 +24,24 @@ RUN mvn package -DskipTests
 
 
 # ---- Run Stage ----
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21.0.1_12-jre-alpine
 
-# Create the "limitedaccessgroup" group
-RUN addgroup limitedaccessgroup
+# Create the "appgroup" group
+RUN addgroup appgroup
 
-# Create a non-root user named "limitedaccessaccount" with a specific user ID (e.g., 1050)
-# and add it to the "limitedaccessgroup" group
-RUN adduser -D -G limitedaccessgroup -u 1050 limitedaccessaccount
+# Create a non-root user named "appuser" with a specific user ID
+# and add it to the "appgroup" group
+RUN adduser -D -G appgroup -u 1050 appuser
 
 # Specify the work directory and set permissions
 WORKDIR /app
-RUN chown limitedaccessaccount:limitedaccessgroup /app
+RUN chown appuser:appgroup /app
 
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
 # Set non-root user
-USER limitedaccessaccount
+USER 1050
 
 # Expose the port that the Spring Boot application will run on (default is 8080)
 EXPOSE 8080

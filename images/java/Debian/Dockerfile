@@ -22,17 +22,19 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:17-jre
 
 # Create a group and a non root user
-RUN groupadd -r limitedaccessuser && useradd -r -g limitedaccessuser limitedaccessuser
+RUN groupadd -g 1000 appgroup && \
+    useradd -m -u 1000 -g appgroup -s /bin/bash appuser
+
 
 # Specify the work directory and set permissions
 WORKDIR /app
-RUN chown limitedaccessuser:limitedaccessuser /app
+RUN chown appuser:appgroup /app
 
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/*.jar app.jar
 
 # Change to non-root user
-USER limitedaccessuser
+USER 1000
 
 # Expose the port that the Spring Boot application will run on (default is 8080)
 EXPOSE 8080
