@@ -1,0 +1,49 @@
+# Exclude node modules
+node_modules/
+
+# Exclude logs
+logs
+*.log
+
+# Exclude Git and version control
+.git
+.gitignore
+.svn
+.hg
+
+# Exclude build output
+/dist
+/tmp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.idea
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.vscode/
+
+# Exclude npm debug logs and lock files
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Exclude environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Exclude other unnecessary files
+*.md
+LICENSE
+.dockerignore
+Dockerfile
+*.sh
