@@ -1,4 +1,4 @@
-bind = '0.0.0.0:8000'
+bind = 'unix:/var/www/myproject/myproject.sock'
 workers = 2
 accesslog = '-'
 errorlog = '-'

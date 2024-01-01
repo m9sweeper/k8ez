@@ -17,19 +17,18 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the Django project files into the container
-COPY ../code/myproject/ .
+COPY ../../code/myproject /var/www/myproject
 
 # Create a non root user and group
-RUN groupadd -r appuser && useradd -r -g appuser -m -d /home/appuser appuser
+RUN groupadd -r appuser && \
+    useradd -r -u 1001 -g appuser -m -d /home/appuser appuser
 
-# Change ownership of directories to the non-root user
-RUN chown -R appuser:appuser /var/www/myproject /var/log/apache2 /var/run/apache2 /var/run /var/lib/apache2 /var/log/supervisor /home/appuser
-
-# Create a non-root user and group with a specific UID
-RUN groupadd -r appuser && useradd -r -g appuser -u 1001 -m -d /home/appuser appuser
+# Create a directory for the Supervisor PID file and set permissions
+RUN mkdir -p /home/appuser/supervisor && chown -R appuser:appuser /home/appuser/supervisor  \
+    /var/www/myproject /var/run/apache2 /home/appuser
 
 # Install Python dependencies
-COPY ../code/myproject/requirements.txt .
+COPY ../../code/myproject/requirements.txt .
 
 RUN pip install --upgrade pip
 
@@ -39,8 +38,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python manage.py collectstatic --noinput
 
 # Copy the Apache and Supervisor configuration files
-COPY ../Debian/apache.conf /etc/apache2/sites-available/000-default.conf
-COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/
+COPY ../apache/Debian/apache.conf /etc/apache2/sites-available/000-default.conf
+COPY ../apache/Debian/supervisord.conf /etc/supervisor/conf.d/
+
+# Sed command to output logs to stdout and stderr
+RUN sed -i 's|CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined|CustomLog /dev/stdout combined|' /etc/apache2/conf-available/other-vhosts-access-log.conf
 
 # Switch to non-root user by UID
 USER 1001
