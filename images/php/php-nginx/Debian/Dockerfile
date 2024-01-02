@@ -23,10 +23,6 @@ COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN chown -R appuser:appgroup /var /run
 
-# Redirect Nginx logs to stdout and stderr
-RUN ln -sf /var/www/html/app_logs/access.log /dev/stdout && \
-    ln -sf /var/www/html/app_logs/errors.log /dev/stderr
-
 # Change to non-root user with specific UID
 USER 1001
 

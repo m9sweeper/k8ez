@@ -28,8 +28,8 @@ RUN mkdir -p /var/lib/nginx/tmp /var/lib/nginx/tmp/client_body && \
     chown -R appuser:appgroup /var/lib/nginx /run
 
 # Redirect Nginx logs to stdout and stderr
-RUN ln -sf  /var/www/html/app_logs/access.log /dev/stdout && \
-    ln -sf  /var/www/html/app_logs/errors.log /dev/stderr
+RUN sed -i 's|error_log /var/log/nginx/error.log warn;|error_log stderr;|' /etc/nginx/nginx.conf
+RUN sed -i 's|access_log /var/log/nginx/access.log main;|access_log stdout;|' /etc/nginx/nginx.conf
 
 # Set the working directory
 WORKDIR /var/www/html
