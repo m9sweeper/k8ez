@@ -2,19 +2,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ include "chart.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    version: {{ .Chart.Version }}
+    {{- include "chart.basicLabels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ required "Values.service requires a type" .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
+    - port: {{ required "Values.service requires a port" .Values.service.port }}
+      targetPort: {{ default .Values.service.port .Values.service.targetPort }}
       name: http
   selector:
-    app: {{ .Release.Name }}
-    release: {{ .Release.Name }}
+    {{- include "chart.basicSelectorLabels" . | nindent 4 }}

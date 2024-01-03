@@ -3,57 +3,72 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ include "chart.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    version: {{ .Chart.Version }}
+    {{- include "chart.basicLabels" . | nindent 4 }}
 spec:
-{{- with .Values.istio.gateways }}
+  {{- with .Values.istio.gateways }}
   gateways:
-{{ toYaml . | indent 4 }}
-{{- end }}
-{{- with .Values.istio.hosts }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.istio.hosts }}
   hosts:
-{{ toYaml . | indent 4 }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   http:
+  {{- if .Values.istio.forceHttpRedirect }}
   - match:
-{{- range .Values.istio.paths }}
-    - uri:
-       prefix: {{ . }}
-{{- end }}
+      - headers:
+          'X-Forwarded-Proto':
+            exact: http
+    redirect:
+      scheme: https
+      redirectCode: 301
+  - match:
+  {{- range .Values.istio.paths }}
+      - uri:
+          prefix: {{ . }}
+        headers:
+          'X-Forwarded-Proto':
+            exact: https
+  {{- end }}
     route:
-    - destination:
-        host: {{ .Release.Name }}
-        port:
-          number: {{ .Values.service.port }}
+      - destination:
+          host: {{ include "chart.fullname" . }}
+          port:
+            number: {{ .Values.service.port }}
+  {{- else }}
+  - match:
+  {{- range .Values.istio.paths }}
+      - uri:
+          prefix: {{ . }}
+  {{- end }}
+    route:
+      - destination:
+          host: {{ include "chart.fullname" . }}
+          port:
+            number: {{ .Values.service.port }}
+  {{- end }}
 
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ include "chart.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    version: {{ .Chart.Version }}
+    {{- include "chart.basicLabels" . | nindent 4 }}
 spec:
-  host: {{ .Release.Name }}
+  host: {{ include "chart.fullname" . }}
   trafficPolicy:
     loadBalancer:
-{{- if .Values.istio.useCustomLoadBalancer -}}
-  {{ toYaml .Values.istio.customLoadBalancer | nindent 6 }}
-{{- else }}
-      simple: {{ .Values.istio.loadBalancerType }}
-{{- end }}
-{{- if .Values.istio.mtls.enabled }}
+      {{- if .Values.istio.useCustomLoadBalancer -}}
+      {{ toYaml .Values.istio.customLoadBalancer | nindent 6 }}
+      {{- else }}
+      simple: {{ required "Values.istio.loadBalancerType is required if customLoadBalancer is false" .Values.istio.loadBalancerType }}
+      {{- end }}
+    {{- if .Values.istio.mtls.enabled }}
     tls:
       mode: ISTIO_MUTUAL
-{{- end }}
+    {{- end }}
 {{- end }}

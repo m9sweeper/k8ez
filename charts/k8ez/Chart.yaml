@@ -2,7 +2,7 @@ apiVersion: v2
 name: k8ez
 description: A Re-usable Helm Chart for Deploying Almost Any App
 type: application
-version: 0.0.1
+version: 1.0.0
 appVersion: 0.0.1
 maintainers:
   - name: M9sweeper

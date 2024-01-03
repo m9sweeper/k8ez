@@ -4,18 +4,13 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ include "chart.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    version: {{ .Chart.Version }}
+    {{- include "chart.basicLabels" . | nindent 4 }}
 spec:
   minAvailable: 50%
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
-      release: {{ .Release.Name }}
+      {{- include "chart.basicSelectorLabels" . | nindent 6 }}
 {{- end }}
 {{ end }}

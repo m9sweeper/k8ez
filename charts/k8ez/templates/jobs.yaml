@@ -1,78 +1,95 @@
 {{- if .Values.jobs.enabled }}
 {{- range .Values.jobs.jobs }}
+{{- $jobName := (required "Each entry in jobs.jobs needs a name" .name) }}
+{{- $dictOfBasicLabels := include "chart.basicLabels" $ | fromYaml }}
+{{- $dictOfBasicSelectorLabels := include "chart.basicSelectorLabels" $ | fromYaml }}
+{{- $jobFullName := printf "%s-job-%s" (include "chart.fullname" $ | trunc 40) $jobName }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .name }}
-{{ if .extraAnnotations }}
-{{- with .extraAnnotations }}
+  name: {{ $jobFullName }}
   annotations:
-    {{ toYaml . | nindent 4 }}
-{{- end }}
-{{ end }}
+    checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+    checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+    {{- include "chart.buildExtraAnnotations" (dict "excludeGlobalExtraAnnotations" .excludeGlobalExtraAnnotations "extraAnnotations" .extraAnnotations "values" $.Values) | indent 4 }}
 spec:
   template:
     metadata:
       annotations:
-{{- if not $.Values.istio.enabled }}
+        checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+        checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+        {{- if not $.Values.istio.enabled }}
         sidecar.istio.io/inject: "false"
-{{- end }}
-{{- if $.Values.extraAnnotations }}
-{{ toYaml $.Values.extraAnnotations | indent 8 }}
-{{- end }}
+        {{- end }}
+        {{- include "chart.buildExtraAnnotations" (dict "excludeGlobalExtraAnnotations" .excludeGlobalExtraAnnotations "extraAnnotations" .extraAnnotations "values" $.Values) | indent 8 }}
     spec:
-      {{if $.Values.imagePullSecrets}}
       {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
-{{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- end }}
-      serviceAccount: {{ $.Release.Name }}
+      serviceAccount: {{ include "chart.fullname" $ }}
       enableServiceLinks: {{ $.Values.enableServiceLinks }}
       securityContext:
         fsGroup: {{ $.Values.podSecurityContext.fsGroup }}
+      restartPolicy: {{ or .restartPolicy "Never" }}
       containers:
-      - name: {{ .name }}
-        image: "{{ or .image $.Values.image.image }}"
-        securityContext: 
-{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 12}}
-{{if .resources}}
-        resources:
-{{ toYaml $.Values.resources | indent 8 }}
-{{- end }}
-{{- if .volumeMounts }}
-        volumeMounts:
-{{ toYaml .volumeMounts | indent 8 }}
-{{- end }}
-{{ if .command }}
-        command: [{{ .command | quote}}]
-{{- end }}
-{{ if .args }}
-        args: 
-{{ toYaml .args | indent 8 }}
-{{- end }}
-{{ if .env }}
-        env: 
-{{- range $k, $v := .env }}
+      - name: {{ $jobFullName | quote }}
+        image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) | quote }}
+        {{- if and .image (kindIs "map" .image) }}
+        {{/* commented out: - if and .image (default dict .image).pullPolicy */}}
+        imagePullPolicy: {{ .image.pullPolicy }}
+        {{- else }}
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        {{- end }}
+        securityContext:
+          {{- toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | nindent 10 }}
+
+        {{- if .command }}
+        command: [{{ .command | quote }}]
+        {{- end }}
+
+        {{- if .args }}
+        args:
+          {{- toYaml .args | nindent 8 }}
+        {{- end }}
+
+        {{- if .env }}
+        env:
+        {{- range $k, $v := .env }}
         - name: {{ $k | quote}}
           value: {{ $v | quote }}
-{{- end }}
-{{- end }}
+        {{- end }}
+        {{- end }}
+
+        {{- if or $.Values.configData $.Values.secretData}}
         envFrom:
-{{ if $.Values.configData }}
-          - configMapRef:
-              name: {{ $.Release.Name }}
-{{- end }}
-{{ if $.Values.secretData }}
-          - secretRef:
-              name: {{ $.Release.Name }}
-{{- end }}
-      restartPolicy: {{ or .restartPolicy "Never" }}
-{{- if .volumes }}
-      volumes:
-{{ toYaml .volumes | indent 6 }}
-{{- end }}
+        {{- if $.Values.configData }}
+        - configMapRef:
+            name: {{ include "chart.fullname" $ }}
+        {{- end }}
+        {{- if $.Values.secretData }}
+        - secretRef:
+            name: {{ include "chart.fullname" $ }}
+        {{- end }}
+        {{- end }}
+
+        {{- with .volumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+
+        {{- if .resources}}
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        {{- else }}
+        {{- with $.Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
+
+      {{- include "chart.buildVolumes" (dict "volumes" .volumes "excludeGlobalVolumes" .excludeGlobalVolumes "values" $.Values) | indent 6 }}
   backoffLimit: 0
 
 {{- end }}

@@ -5,3 +5,6 @@ helm template test-simple-app ../charts/k8ez --set-string image.image=redis --se
 # Template with a ton of features enabled
 echo "\n\n\n\n----------------------------- RUNNING TESTS WITH MANY CONFIGS ---------------------------------\n\n\n\n"
 helm template test-everything-app ../charts/k8ez --values everything.values.yaml -n default > full-features-test.yaml
+
+echo "\n\n\n\n----------------------------- RUNNING TESTS WITH MANY CONFIGS AND ISTIO ---------------------------------\n\n\n\n"
+helm template test-everything-app ../charts/k8ez --values everything.values.yaml --set-string nameOverride=ingress-nameOverride --set-string fullnameOverride=test-everything-app-ingress --set-string ingress.k8sIngress.enabled=false --set-string ingress.istio.enabled=true --set-string ingress.istio.forceHttpRedirect=true -n default > full-features-istio-test.yaml

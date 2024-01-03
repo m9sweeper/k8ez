@@ -1,47 +1,56 @@
 {{- if .Values.extraDeployment.enabled -}}
 {{- range .Values.extraDeployment.deployments }}
+{{- $deploymentName := (required "Each entry in extraDeployment.deployments needs a name" .name) }}
+{{- $dictOfBasicLabels := include "chart.basicLabels" $ | fromYaml }}
+{{- $dictOfBasicSelectorLabels := include "chart.basicSelectorLabels" $ | fromYaml }}
+{{- $deploymentFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) .name }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .name }}
+  name: {{ $deploymentFullName }}
   labels:
-    app: {{ .name }}
-    chart: {{ include "chart.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
-    version: {{ $.Chart.Version }}
+    {{- range $k, $v := $dictOfBasicLabels }}
+    {{- if eq $k "app" }}
+    {{ $k }}: {{ $deploymentFullName }}
+    {{- else}}
+    {{ $k }}: {{ $v }}
+    {{- end }}
+    {{- end }}
 spec:
-  replicas: {{ .replicaCount }}
+  replicas: {{ required "Each entry in extraDeployment.deployments needs a replicaCount" .replicaCount }}
   selector:
     matchLabels:
-      app: {{ .name }}
-      release: {{ $.Release.Name }}
+      {{- range $k, $v := $dictOfBasicSelectorLabels }}
+      {{- if eq $k "app" }}
+      {{ $k }}: {{ $deploymentFullName }}
+      {{- else}}
+      {{ $k }}: {{ $v }}
+      {{- end }}
+      {{- end }}
   template:
     metadata:
       annotations:
         checksum/{{ include "chart.fullname" $ }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
         checksum/{{ include "chart.fullname" $ }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
-{{- if not $.Values.istio.enabled }}
+        {{- if not $.Values.istio.enabled }}
         sidecar.istio.io/inject: "false"
-{{- end }}
-{{- if $.Values.extraAnnotations }}
-{{ toYaml $.Values.extraAnnotations | indent 8 }}
-{{- end }}
+        {{- end }}
+        {{- include "chart.buildExtraAnnotations" (dict "excludeGlobalExtraAnnotations" .excludeGlobalExtraAnnotations "extraAnnotations" .extraAnnotations "values" $.Values) | indent 8 }}
       labels:
-        app: {{ .name }}
-        chart: {{ include "chart.chart" $ }}
-        release: {{ $.Release.Name }}
-        heritage: {{ $.Release.Service }}
-        version: {{ $.Chart.Version }}
+        {{- range $k, $v := $dictOfBasicLabels }}
+        {{- if eq $k "app" }}
+        {{ $k }}: {{ $deploymentFullName }}
+        {{- else}}
+        {{ $k }}: {{ $v }}
+        {{- end }}
+        {{- end }}
     spec:
-      {{if $.Values.imagePullSecrets}}
       {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
-{{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- end }}
-      serviceAccount: {{ $.Release.Name }}
+      serviceAccount: {{ include "chart.fullname" $ }}
       enableServiceLinks: {{ $.Values.enableServiceLinks }}
       securityContext:
         fsGroup: {{ $.Values.podSecurityContext.fsGroup }}
@@ -52,127 +61,165 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchExpressions:
-                  - key: app
+                  {{- range $k, $v := $dictOfBasicSelectorLabels }}
+                  - key: {{ $k | quote }}
                     operator: In
                     values:
-                    - {{ .name }}
-                  - key: release
-                    operator: In
-                    values:
-                    - {{ $.Release.Name }}
+                      {{- if eq $k "app" }}
+                      - {{ $deploymentFullName | quote }}
+                      {{- else }}
+                      - {{ $v | quote }}
+                  {{- end }}
+                  {{- end }}
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: "{{ .name }}"
-          image: "{{ or .image $.Values.image.image }}"
-          securityContext: 
-{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 12}}
-{{ if .command }}
+        - name: {{ $deploymentFullName | quote }}
+          image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) | quote }}
+          {{- if and .image (kindIs "map" .image) }}
+          {{/* commented out: - if and .image (default dict .image).pullPolicy */}}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          {{- else }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          {{- end }}
+          securityContext:
+            {{- toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | nindent 12}}
+          ports:
+            - containerPort: {{ required "Each entry in extraDeployment.deployments needs a port" .port }}
+
+          {{- if .command }}
           command: [{{ .command | quote }}]
-{{- end }}
-{{ if .args }}
-          args: 
-{{ toYaml .args | indent 10 }}
-{{- end }}
-{{ if .env }}
-          env: 
-{{- range $k, $v := .env }}
+          {{- end }}
+
+          {{- if .args }}
+          args:
+            {{- toYaml .args | nindent 10 }}
+          {{- end }}
+
+          {{- if .env }}
+          env:
+          {{- range $k, $v := .env }}
           - name: {{ $k | quote}}
             value: {{ $v | quote }}
-{{- end }}
-{{- end }}
+          {{- end }}
+          {{- end }}
+
+          {{- if or $.Values.configData $.Values.secretData}}
           envFrom:
-{{ if $.Values.configData }}
+          {{- if $.Values.configData }}
           - configMapRef:
-              name: {{ $.Release.Name }}
-{{- end }}
-{{ if $.Values.secretData }}
+              name: {{ include "chart.fullname" $ }}
+          {{- end }}
+          {{- if $.Values.secretData }}
           - secretRef:
-              name: {{ $.Release.Name }}
-{{- end }}
-          ports:
-            - containerPort: {{ .port }}
-{{- with $.Values.livenessProbe }}
+              name: {{ include "chart.fullname" $ }}
+          {{- end }}
+          {{- end }}
+
+          {{- with $.Values.livenessProbe }}
           livenessProbe:
-{{ toYaml . | indent 12 }}
-{{- end }}
-{{- with $.Values.readinessProbe }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with $.Values.readinessProbe }}
           readinessProbe:
-{{ toYaml . | indent 12 }}
-{{- end }}
-{{- if .volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .volumeMounts }}
           volumeMounts:
-{{ toYaml .volumeMounts | indent 10 }}
-{{- end }}
-{{if .resources}}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- if .resources}}
           resources:
-{{ toYaml .Values.resources | indent 10 }}
-{{- end }}
-{{- with $.Values.nodeSelector }}
+            {{- toYaml .resources | nindent 12 }}
+          {{- else }}
+          {{- with $.Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+
+      {{- with $.Values.nodeSelector }}
       nodeSelector:
-{{ toYaml . | indent 8 }}
-{{- end }}
-{{- with $.Values.affinity }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with $.Values.affinity }}
       affinity:
-{{ toYaml . | indent 8 }}
-{{- end }}
-{{- with $.Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with $.Values.tolerations }}
       tolerations:
-{{ toYaml . | indent 8 }}
-{{- end }}
-{{- if .volumes }}
-      volumes:
-{{ toYaml .volumes | indent 6 }}
-{{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- include "chart.buildVolumes" (dict "volumes" .volumes "excludeGlobalVolumes" .excludeGlobalVolumes "values" $.Values) | indent 6 }}
+
 {{- end }}
 {{- end }}
 
 
 {{- if .Values.extraDeployment.hpaExtra.enabled -}}
 {{- range .Values.extraDeployment.deployments }}
+{{- $deploymentName := (required "Each entry in extraDeployment.deployments needs a name" .name) }}
+{{- $deploymentFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) $deploymentName }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .name }}
+  name: {{ $deploymentFullName }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .name }}
-  minReplicas: {{ .minPods }}
-  maxReplicas: {{ .maxPods }}
+    name: {{ $deploymentFullName }}
+  minReplicas: {{ required "if extraDeployment has hpaExtra enabled, each deployment must have minPods and maxPods set" .minPods }}
+  maxReplicas: {{ required "if extraDeployment has hpaExtra enabled, each deployment must have minPods and maxPods set" .maxPods }}
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: {{ .cpuAverageUtilizationThreshold }}
+        averageUtilization: {{ required "if extraDeployment has hpaExtra enabled, each deployment must have cpuAverageUtilizationThreshold set" .cpuAverageUtilizationThreshold }}
 {{- end }}
 {{- end }}
 
 
 {{- if .Values.extraDeployment.enabled -}}
 {{- range .Values.extraDeployment.deployments }}
+{{- $deploymentName := (required "Each entry in extraDeployment.deployments needs a name" .name) }}
+{{- $dictOfBasicLabels := include "chart.basicLabels" $ | fromYaml }}
+{{- $dictOfBasicSelectorLabels := include "chart.basicSelectorLabels" $ | fromYaml }}
+{{- $deploymentFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) $deploymentName }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .name }}
+  name: {{ $deploymentFullName }}
   labels:
-    app: {{ .name }}
-    chart: {{ include "chart.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
-    version: {{ $.Chart.Version }}
+    {{- range $k, $v := $dictOfBasicLabels }}
+    {{- if eq $k "app" }}
+    {{ $k }}: {{ $deploymentFullName }}
+    {{- else}}
+    {{ $k }}: {{ $v }}
+    {{- end }}
+    {{- end }}
 spec:
-  type: {{ .serviceType }}
+  type: {{ default "ClusterIP" .serviceType }}
   ports:
     - port: {{ .port }}
       targetPort: {{ or .targetPort .port }}
       name: http
   selector:
-    app: {{ .name }}
-    release: {{ $.Release.Name }}
+    {{- range $k, $v := $dictOfBasicSelectorLabels }}
+    {{- if eq $k "app" }}
+    {{ $k }}: {{ $deploymentFullName }}
+    {{- else}}
+    {{ $k }}: {{ $v }}
+    {{- end }}
+    {{- end }}
 {{- end }}
 {{- end }}

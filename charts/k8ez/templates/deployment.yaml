@@ -3,44 +3,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "chart.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ include "chart.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    version: {{ .Chart.Version }}
+    {{- include "chart.basicLabels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
-      release: {{ .Release.Name }}
+      {{- include "chart.basicSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
         checksum/{{ include "chart.fullname" . }}-configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/{{ include "chart.fullname" . }}-secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
-{{- if not .Values.istio.enabled }}
+        {{- if not .Values.istio.enabled }}
         sidecar.istio.io/inject: "false"
-{{- end }}
-{{- if .Values.extraAnnotations }}
-{{ toYaml .Values.extraAnnotations | indent 8 }}
-{{- end }}
+        {{- end }}
+        {{- if .Values.extraAnnotations }}
+        {{- toYaml .Values.extraAnnotations | nindent 8 }}
+        {{- end }}
       labels:
-        app: {{ .Release.Name }}
-        chart: {{ include "chart.chart" . }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
-        version: {{ .Chart.Version }}
+        {{- include "chart.basicLabels" . | nindent 8 }}
     spec:
-{{ if .Values.imagePullSecrets }}
-{{- with .Values.imagePullSecrets }}
+      {{- if .Values.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-{{ toYaml . | nindent 8 }}
-{{- end }}
-{{- end }}
-      serviceAccount: {{ .Release.Name }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      serviceAccount: {{ include "chart.fullname" . }}
       enableServiceLinks: {{ .Values.enableServiceLinks }}
       securityContext:
         fsGroup: {{ .Values.podSecurityContext.fsGroup }}
@@ -51,70 +42,131 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchExpressions:
-                  - key: app
+                  {{- $dictOfBasicSelectorLabels := include "chart.basicSelectorLabels" . | fromYaml }}
+                  {{- range $k, $v := $dictOfBasicSelectorLabels }}
+                  - key: {{ $k | quote }}
                     operator: In
                     values:
-                    - {{ .Release.Name }}
-                  - key: release
-                    operator: In
-                    values:
-                    - {{ .Release.Name }}
+                    - {{ $v | quote }}
+                  {{- end }}
               topologyKey: kubernetes.io/hostname
-      containers:
-        - name: "{{ .Release.Name }}"
-          image: "{{ .Values.image.image }}"
-          securityContext: 
-{{ toYaml .Values.securityContext | indent 12}}
-{{ if .Values.deployment.command }}
-          command: [{{ .Values.deployment.command | quote }}]
-{{- end }}
-{{ if .Values.deployment.args }}
-          args: 
-{{ toYaml .Values.deployment.args | indent 10 }}
-{{- end }}
+      {{- if .Values.deployment.initContainers.enabled }}
+      initContainers:
+        {{- range .Values.deployment.initContainers.containers }}
+        - name: {{ required "A valid name for each initContainer is required!" .name | lower }}
+          image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) }}
+          {{- if and .image (default dict .image).pullPolicy }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          {{- else }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          {{- end }}
+          securityContext:
+            {{- toYaml (default $.Values.securityContext .securityContext) | nindent 12}}
+
+          {{- if .command }}
+          command: [{{ .command | quote }}]
+          {{- end }}
+
+          {{- if .args }}
+          args: {{- toYaml .args | nindent 10 }}
+          {{- end }}
+
+          {{- if or $.Values.configData $.Values.secretData}}
           envFrom:
-{{ if .Values.configData }}
+          {{- if $.Values.configData }}
           - configMapRef:
-              name: {{ .Release.Name }}
-{{- end }}
-{{ if .Values.secretData }}
+              name: {{ include "chart.fullname" $ }}
+          {{- end }}
+
+          {{- if $.Values.secretData }}
           - secretRef:
-              name: {{ .Release.Name }}
-{{- end }}
-          ports:
-            - containerPort: {{ .Values.service.port }}
-{{- with .Values.livenessProbe }}
-          livenessProbe:
-{{ toYaml . | indent 12 }}
-{{- end }}
-{{- with .Values.readinessProbe }}
-          readinessProbe:
-{{ toYaml . | indent 12 }}
-{{- end }}
-{{- if .Values.volumeMounts }}
+              name: {{ include "chart.fullname" $ }}
+          {{- end }}
+          {{- end }}
+
+          {{- with $.Values.volumeMounts }}
           volumeMounts:
-{{ toYaml .Values.volumeMounts | indent 12 }}
-{{- end }}
-{{ if .Values.resources }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with (default $.Values.resources .resources) }}
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-{{- end }}
-{{- with .Values.nodeSelector }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ include "chart.fullname" . | quote }}
+          {{- if .Values.image.tag }}
+          image: {{ required "You must include image.image" .Values.image.image }}:{{ .Values.image.tag }}
+          {{- else }}
+          image: {{ required "You must include image.image" .Values.image.image }}
+          {{- end }}
+          securityContext:
+            {{- toYaml (required ".Values.securityContexts is required" .Values.securityContext) | nindent 12 }}
+          ports:
+            - containerPort: {{ required "Values.service.port is required" .Values.service.port }}
+
+          {{- if .Values.deployment.command }}
+          command: [{{ .Values.deployment.command | quote }}]
+          {{- end }}
+
+          {{- if .Values.deployment.args }}
+          args:
+            {{- toYaml .Values.deployment.args | nindent 10 }}
+          {{- end }}
+
+          {{- if or .Values.configData .Values.secretData}}
+          envFrom:
+          {{- if .Values.configData }}
+          - configMapRef:
+              name: {{ include "chart.fullname" . }}
+          {{- end }}
+
+          {{- if .Values.secretData }}
+          - secretRef:
+              name: {{ include "chart.fullname" . }}
+          {{- end }}
+          {{- end }}
+
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+      {{- with .Values.nodeSelector }}
       nodeSelector:
-{{ toYaml . | indent 8 }}
-{{- end }}
-{{- with .Values.affinity }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.affinity }}
       affinity:
-{{ toYaml . | indent 8 }}
-{{- end }}
-{{- with .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.tolerations }}
       tolerations:
-{{ toYaml . | indent 8 }}
-{{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
-{{- if .Values.volumes }}
+      {{- with .Values.volumes }}
       volumes:
-{{ toYaml .Values.volumes | indent 6 }}
-{{- end }}
-
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
 {{- end }}

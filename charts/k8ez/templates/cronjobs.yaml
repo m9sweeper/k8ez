@@ -1,5 +1,7 @@
 {{- if .Values.cronJobs.enabled }}
 {{- range .Values.cronJobs.scheduled }}
+{{- $cronJobName := (required "Each entry in cronJobs.scheduled needs a name" .name) }}
+{{- $cronJobFullName := printf "%s-%s" (include "chart.fullname" $ | trunc 40) $cronJobName }}
 ---
 {{- if $.Capabilities.APIVersions.Has "batch/v1/CronJob" -}}
 apiVersion: batch/v1
@@ -8,13 +10,9 @@ apiVersion: batch/v1beta1
 {{- end }}
 kind: CronJob
 metadata:
-  name: {{ .name }}
-  labels:
-    app: {{ $.Release.Name }}
-    chart: {{ include "chart.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
-    version: {{ $.Chart.Version }}
+  name: {{ $cronJobFullName }}
+  labels:  {{/*  TODO: should the app label include the cronjob name?  */}}
+    {{- include "chart.basicLabels" $ | nindent 4}}
 spec:
   concurrencyPolicy: Forbid
   jobTemplate:
@@ -22,64 +20,84 @@ spec:
       template:
         metadata:
           annotations:
-{{- if not $.Values.istio.enabled }}
+            {{- if not $.Values.istio.enabled }}
             sidecar.istio.io/inject: "false"
-{{- end }}
-{{- if $.Values.extraAnnotations }}
-{{ toYaml $.Values.extraAnnotations | indent 12 }}
-{{- end }}
+            {{- end }}
+            {{- if $.Values.extraAnnotations }}
+            {{- toYaml $.Values.extraAnnotations | nindent 12 }}
+            {{- end }}
         spec:
-          {{if $.Values.imagePullSecrets}}
           {{- with $.Values.imagePullSecrets }}
           imagePullSecrets:
             {{- toYaml . | nindent 8 }}
           {{- end }}
-          {{ end }}
-          serviceAccount: {{ $.Release.Name }}
+          serviceAccount: {{ include "chart.fullname" $ }}
           enableServiceLinks: {{ $.Values.enableServiceLinks }}
           securityContext:
             fsGroup: {{ $.Values.podSecurityContext.fsGroup }}
           containers:
             - name: {{ .name }}
-              image: "{{ or .image $.Values.image.image }}"
-              securityContext: 
-{{ toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | indent 16}}
-{{if .resources}}
-              resources:
-{{ toYaml $.Values.resources | indent 14 }}
-{{- end }}
-{{- if .volumeMounts }}
-              volumeMounts:
-{{ toYaml .volumeMounts | indent 14 }}
-{{- end }}
-{{ if .command }}
+              image: {{ include "chart.buildImagePath" (dict "image" .image "values" $.Values ) | quote }}
+              {{- if and .image (kindIs "map" .image) }}
+              {{/* commented out: - if and .image (default dict .image).pullPolicy */}}
+              imagePullPolicy: {{ .image.pullPolicy }}
+              {{- else }}
+              imagePullPolicy: {{ $.Values.image.pullPolicy }}
+              {{- end }}
+              securityContext:
+                {{- toYaml (merge dict $.Values.securityContext (or .securityContext dict)) | nindent 16}}
+
+              {{- if .command }}
               command: [{{ .command | quote }}]
-{{- end }}
-{{ if .args }}
-              args: 
-{{ toYaml .args | indent 14 }}
-{{- end }}
-{{ if .env }}
-              env: 
-{{- range $k, $v := .env }}
+              {{- end }}
+
+              {{- if .args }}
+              args:
+                {{- toYaml .args | nindent 14 }}
+              {{- end }}
+
+              {{- if .env }}
+              env:
+              {{- range $k, $v := .env }}
               - name: {{ $k | quote}}
                 value: {{ $v | quote }}
-{{- end }}
-{{- end }}
+              {{- end }}
+              {{- end }}
+
+              {{- if or $.Values.configData $.Values.secretData}}
               envFrom:
-{{ if $.Values.configData }}
+              {{- if $.Values.configData }}
               - configMapRef:
-                  name: {{ $.Release.Name }}
-{{- end }}
-{{ if $.Values.secretData }}
+                  name: {{ include "chart.fullname" $ }}
+              {{- end }}
+              {{- if $.Values.secretData }}
               - secretRef:
-                  name: {{ $.Release.Name }}
-{{- end }}
+                  name: {{ include "chart.fullname" $ }}
+              {{- end }}
+              {{- end }}
+
+              {{- with .volumeMounts }}
+              volumeMounts:
+                {{- toYaml . | nindent 14 }}
+              {{- end }}
+
+              {{- if .resources}}
+              resources:
+                {{- toYaml .resources | nindent 16 }}
+              {{- else }}
+              {{- with $.Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- end }}
+
           restartPolicy: {{ or .restartPolicy "Never" }}
-{{- if .volumes }}
+
+          {{- if .volumes }}
           volumes:
-{{ toYaml .volumes | indent 10 }}
-{{- end }}
+          {{- toYaml .volumes | nindent 10 }}
+          {{- end }}
+
   schedule: {{ .schedule | quote }}
 
 {{- end }}

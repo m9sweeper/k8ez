@@ -1,10 +1,14 @@
 #########################################################
 # Define the main deployment of the app                 #
 #########################################################
+# Overrides for the name
+nameOverride: ""  # chart name override
+fullnameOverride: ""  # full name override (install + chart name)
 
 # Image and any required credentials to download it for the default deployment
 image:
   image: ""
+  tag: ""
   pullPolicy: Always
   credentials:
     create: false
@@ -30,14 +34,27 @@ podSecurityContext:
   fsGroup: 1050
 
 # Specify image pull secrets if required or if you have it creating registry credentials
-# imagePullSecrets: 
+# imagePullSecrets:
 # - name: Release.name--registry-secret
 
 # Enable deployment - by default we enable a simple deployment
-deployment: 
+deployment:
   enabled: true
-  # command: "sh"
-  # args: []
+  command: ""
+  args: []
+  # by default, disable initContainers
+  initContainers:
+    enabled: false
+    containers: []
+#      - name: migrations
+#        image:
+#          image: "path/to/image"
+#          tag: "my-tag"
+#          pullPolicy: always
+#        command: 'python'
+#        args: ['manage.py', 'migrate_schemas']
+#        securityContext: {}
+#        resources: {}
 
 # Configure the number of pods for this service.  If autoscale is enabled, replica count is not used.
 replicaCount: 1
@@ -47,18 +64,18 @@ autoscale:
   maxPods: 4
   cpuAverageUtilizationThreshold: 70
 
-podDisruptionBudget: 
+podDisruptionBudget:
   enabled: false
 
 # Enable and configure a service with a reasonable default port
 service:
   type: ClusterIP
   port: 8080
+#  targetPort: 8080  # will use port by default
 
 # Configure resources it will be given with reasonable defaults
 resources:
   limits:
-    cpu: 1000m
     memory: 512Mi
   requests:
     cpu: 200m
@@ -84,11 +101,17 @@ configData: {}
 
 # Set secret data key-value pairs that will be loaded into env variables
 secretData: {}
+#  K8ezSecret: 'YES'
 
-# List of files to load into configmaps.  Supports glob patterns, all files that match will be put into the configmap
+# List of files to load into configmaps.
+# Supports glob patterns, all files that match will be put into the configmap
+# note that the path to the file(s) should be from within the k8ez chart
+# (ie: files/config.toml refers to charts/k8ez/files/config.toml)
 configFiles: []
-  # - fileGlob: files/config.toml
-  #   configMapName: config.toml
+#  - configMapName: all-toml
+#    fileGlob: "files/**.toml"
+#  - fileGlob: files/config.toml
+#    configMapName: config.toml
 
 # List of extra annotations to be injected into pod templates
 extraAnnotations: {}
@@ -105,22 +128,22 @@ extraAnnotations: {}
 
 # See https://kubernetes.io/docs/concepts/storage/volumes/
 volumes: []
-  # - name: mydir
-  #   hostPath:
-  #     # Ensure the file directory is created.
-  #     path: /var/local/aaa
-  #     type: DirectoryOrCreate
+#  - name: mydir
+#    hostPath:
+#      # Ensure the file directory is created.
+#      path: /var/local/aaa
+#      type: DirectoryOrCreate
 
 volumeMounts: []
-  # - name: myvolume
-  #   mountPath: /mount
+#  - name: myvolume
+#    mountPath: /mount
 
 # See https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-persistentVolumeClaims:
-  # - name: efs
-  #   accessMode: ReadWriteMany
-  #   storageClass: my-storage-class
-  #   size: 50Gi
+persistentVolumeClaims: []
+#   - name: efs
+#     accessMode: ReadWriteMany
+#     storageClassName: my-storage-class
+#     size: 50Gi
 
 # Possibly select a certain type of node
 nodeSelector: {}
@@ -137,7 +160,6 @@ enableServiceLinks: true
 ###########
 # Ingress #
 ###########
-
 # Deploys a Kubernetes Ingress resource, defaults to nginx ingress controller.
 # If networking.k8s.io/v1 is available in your cluster that will be used,
 # otherwise fall back to networking.k8s.io/v1
@@ -168,6 +190,7 @@ istio:
   paths: []
   loadBalancerType: ROUND_ROBIN
   useCustomLoadBalancer: false
+  forceHttpRedirect: false
   customLoadBalancer: {}
     # consistentHash:
     #   httpCookie:
@@ -179,79 +202,109 @@ istio:
 #########################################################
 # Stateful Sets                                         #
 #########################################################
-
 statefulSets:
   enabled: false
   statefulsets: []
-    # - name: abcd
-    #   image: nginx
-    #   port: 4000
-    #   serviceType: "ClusterIP"
-    #   replicaCount: 1
-    #   command: "sh"
-    #   args: []
-    #   volumes: []
-    #   volumeMounts: []
-    #   env: {} # additional env vars
-    #   securityContext: {}
+#    - name: nginx
+#      replicaCount: 1
+#      excludeGlobalExtraAnnotations: true  # false if unset
+#      extraAnnotations:
+#        testing: 1234
+#      image:
+#        image: nginx
+#        tag: latest
+#        pullPolicy: always
+#      port: 4000
+#      targetPort: 8080
+#      serviceType: "ClusterIP"
+#      command: "sh"
+#      args: ["test", "me"]
+#      excludeGlobalVolumes: true  # false if unset
+#      volumes: []
+#      volumeMounts: []
+#      resources: {}  # will default to global resources
+#      env: # additional env vars
+#        ENV_VAR_1: "my env var"
+#      securityContext:
+#        testing: 5678
 
 #############################################################
 # Additional Deployments                                    #
 #############################################################
-
 extraDeployment:
   enabled: false
   hpaExtra: # autoscaling
     enabled: false
   deployments: []
-    # - name: abcde
-    #   image: nginx
-    #   port: 4000
-    #   targetPort: 8080
-    #   serviceType: "ClusterIP"
-    #   replicaCount: 1
-    #   command: "sh"
-    #   args: []
-    #   volumes: []
-    #   volumeMounts: []
-    #   env: {} # additional env vars
-    #   securityContext: {}
-    #   
-    #   minPods: 2
-    #   maxPods: 4
-    #   cpuAverageUtilizationThreshold: 70
+#    - name: nginx-TEST
+#      replicaCount: 1
+#      excludeGlobalExtraAnnotations: true  # false if unset
+#      extraAnnotations:
+#        testing: 1234
+#      image:
+#        image: nginx
+#        tag: latest
+#        pullPolicy: always
+#      port: 4000
+#      targetPort: 8080
+#      serviceType: "ClusterIP"
+#      command: "sh"
+#      args: ["test", "me"]
+#      excludeGlobalVolumes: true  # false if unset
+#      volumes: []
+#      volumeMounts: []
+#      resources: {}  # will default to global resources
+#      env: # additional env vars
+#        ENV_VAR_1: "my env var"
+#      securityContext:
+#        testing: 5678
+#      minPods: 2
+#      maxPods: 4
+#      cpuAverageUtilizationThreshold: 70
 
 
 ############
 # CronJobs #
 ############
-
 cronJobs:
-  enabled: false
+  enabled: true
   scheduled: []
-    # - name: abc
-    #   image: nginx
-    #   schedule: "30 * * * *" # every 30 min
-    #   command: "sh"
-    #   args: []
-    #   volumes: []
-    #   volumeMounts: []
-    #   env: {} # additional env vars
-    #   securityContext: {}
+#    - name: abc
+#      image:
+#        image: nginx
+#        tag: latest
+#        pullPolicy: always
+#      securityContext:
+#        testing: 1234
+#      schedule: "30 * * * *" # every 30 min
+#      command: "sh"
+#      args: []
+#      volumes: []
+#      volumeMounts: []
+#      env: {} # additional env vars
 
 ########
 # Jobs #
 ########
-
 jobs:
   enabled: false
   jobs: []
-    # - name: hgu
-    #   image: nginx
-    #   command: "sh"
-    #   #args: []
-    #   #volumes: []
-    #   #volumeMounts: []
-    #   #env: {} # additional env vars
-    #   #extraAnnotations: {} # additional annotations
-    #   securityContext: {}
+#    - name: nginx
+#      excludeGlobalExtraAnnotations: true  # false if unset
+#      extraAnnotations:
+#        testing: 1234
+#      image:
+#        image: nginx
+#        tag: latest
+#        pullPolicy: always
+#      securityContext:
+#        testing: 5678
+#      restartPolicy: ""  # will default to "Never"
+#      command: "sh"
+#      args: ["test", "me"]
+#      env: # additional env vars
+#       ENV_VAR_1: "my env var"
+#      resources: {}  # will default to global resources
+#      excludeGlobalVolumes: true  # false if unset
+#      volumes: []
+#      volumeMounts: []
