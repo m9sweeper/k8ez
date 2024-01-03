@@ -39,7 +39,7 @@ COPY ../Debian/nginx.conf /etc/nginx/sites-enabled/default
 COPY ../Debian/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Switch to the non-root user
-USER appuser
+USER 1000
 
 # Expose port 8080
 EXPOSE 8080
