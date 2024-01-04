@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:12.4
 
 # Install Node.js, Yarn, Nginx, and Supervisor
 RUN apt-get update && \
