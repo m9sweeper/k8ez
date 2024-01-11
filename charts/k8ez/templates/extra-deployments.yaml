@@ -12,7 +12,7 @@ metadata:
     heritage: {{ $.Release.Service }}
     version: {{ $.Chart.Version }}
 spec:
-  replicas: {{ .replicaCount }}
+  replicas: {{ ternary $.Values.autoscale.maxPods $.Values.replicaCount $.Values.autoscale.enabled }}
   selector:
     matchLabels:
       app: {{ .name }}
