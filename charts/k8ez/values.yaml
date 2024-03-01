@@ -168,6 +168,7 @@ istio:
   paths: []
   loadBalancerType: ROUND_ROBIN
   useCustomLoadBalancer: false
+#  rewrite: /
   customLoadBalancer: {}
     # consistentHash:
     #   httpCookie:
