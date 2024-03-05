@@ -25,6 +25,10 @@ spec:
     - uri:
        prefix: {{ . }}
 {{- end }}
+{{- if .Values.istio.rewrite }}
+    rewrite:
+      uri: {{ .Values.istio.rewrite }}
+{{- end }}
     route:
     - destination:
         host: {{ .Release.Name }}
