@@ -1,0 +1,10 @@
+- hosts: localhost
+  name: Test ansible installation
+  tasks:
+    - name: Run hello world example
+      debug:
+        msg: "Hello World"
+
+    - name: Print ansible version
+      debug:
+        msg: "The version of Ansible installed is: {{ ansible_version.full }}"
