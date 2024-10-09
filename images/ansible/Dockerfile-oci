@@ -1,0 +1,72 @@
+FROM alpine:3.17
+
+ENV ANSIBLE_VERSION='6.4.0'
+ENV YQ_VERSION='v4.33.3'
+ENV KUBECTL_VERSION='v1.27.1'
+ENV HELM3_VERSION='v3.11.3'
+
+# hack until someone refactors to debian-slim
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
+
+RUN echo "===> Installing Ansible and OCI CLI..." \
+    && apk update && apk upgrade
+RUN echo "===> Installing dependencies..." \
+    && apk add --update --no-cache --progress \
+        sudo \
+        tar \
+        python3 \
+        openssl \
+		ca-certificates \
+        git \
+        openssh \
+        sshpass \
+        bash \
+        py3-six \
+        py3-colorama \
+        py3-requests \
+        py3-pip
+RUN apk --update add --virtual \
+        build-dependencies \
+        python3-dev \
+        libffi-dev \
+        openssl-dev \
+        build-base \
+        gcc \
+        musl-dev \
+        make \
+        linux-headers
+RUN pip3 install \
+        wheel \
+        openshift \
+        PyYAML \
+        requests \
+        packaging \
+        kubernetes-validate \
+        oci-cli 
+RUN echo "===> Installing Ansible..." \
+	  && pip3 install -U -I ansible==${ANSIBLE_VERSION} boto3
+RUN echo "===> Cleaning up..." \
+    && apk del build-dependencies
+
+RUN echo "===> Installing CLI Tools..." \
+    && apk add --update --no-cache \
+         curl \
+         bash \
+         jq \
+         git \
+    && wget -q "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -O /usr/local/bin/yq \
+    && chmod +x /usr/local/bin/yq \
+    && curl -L https://raw.githubusercontent.com/nats-io/nsc/master/install.py | python \
+    && mv /root/.nsccli/bin/nsc /usr/local/bin/nsc \
+    && chmod +x /usr/local/bin/nsc
+
+RUN echo "===> Installing k8s Tools..." \
+    && echo "===> Installing kubectl ${KUBECTL_VERSION}..." \
+    && wget -q "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" -O /usr/local/bin/kubectl \
+    && chmod +x /usr/local/bin/kubectl \
+    && echo "===> Installing helm3 ${HELM3_VERSION} with plugins..." \
+    && wget -q "https://get.helm.sh/helm-${HELM3_VERSION}-linux-amd64.tar.gz" -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm \
+    && chmod +x /usr/local/bin/helm \
+    && helm plugin install https://github.com/databus23/helm-diff --version master
+
+CMD [ "bash" ]
