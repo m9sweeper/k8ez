@@ -25,16 +25,18 @@ The Docker build will display the build steps as it runs, and once it finishes i
 To run ansible commands locally, you will need to create a docker container and attach a shell to it. This can be
 accomplished with the following command:
 
-`docker run --rm -it -v $k8ez_REPOSITORY_PATH/tests:/tests ansible-oci-container:latest /bin/bash`
+`docker run --rm -it -v $PWD:/playbooks -v ~/.ssh:/root/.ssh ansible-oci-container:latest /bin/bash`
 
 Here's a quick breakdown of what the above command is doing:
 
 - `docker run`: this tells Docker to create a new container using an image specified later
 - `--rm`: Delete the container after exiting. This prevents a large number of unused containers from building up on disk over time
 - `-it`: Run in interactive mode. This places you on the command line of the newly created container, and is how you will run ansible commands
-- `-v $k8ez_REPOSITORY_PATH/tests:/tests`: Mount a volume onto the container. This gives the Docker container access
-to specified files on the filesystem. In this case, it is the "tests" directory of this repository. When doing
-development work, you will change the path to the location of your ansible code
+- `-v $PWD:/playbooks`: Mount a volume onto the container. This gives the Docker container access
+to specified files on the filesystem. In this case, it mounts the current working directory onto the /playbooks
+directory of the container.
+- `-v ~/.ssh:/root/.ssh`: Mount the user's SSH directory onto the Docker container. Placing SSH keys and configs into
+the container's /root/.ssh directory allows ansible to use SSH configurations from your host machine to connect to target machines
 - `ansible-oci-container:latest`: Create a container using the "ansible-oci-container" image, with the "latest" tag
 - `/bin/bash`: Use the bash shell within the container
 
@@ -47,5 +49,5 @@ Note: the docker run command can be assigned to an alias within a .bashrc file o
 In order to run ansible within the container, all you need to do is run the command `ansible-playbook playbook.yml`.
 The Docker image has ansible and all prerequisites preinstalled on it, and can run playbooks with no additional setup.
 
-The tests directory contains an example playbook, which can be run using `ansible-playbook tests/ansible-hello-world.yml`.
+The tests directory contains an example playbook, which can be run using `ansible-playbook playbooks/ansible-hello-world.yml`.
 This will run a short playbook that prints a message to the screen and displays the ansible version.
